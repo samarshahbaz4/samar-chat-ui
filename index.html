@@ -40,15 +40,14 @@
             background-color: var(--surface-color);
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .app-header {
-            display: flex; justify-content: center; align-items: center;
-            padding: 14px 16px;
-            background-color: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
+        /* Style adjustment for the removed header */
+        #chat-window {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+            /* Add a top border to separate from the top edge now */
+            border-top: 1px solid var(--border-color);
         }
-        .app-header h1 { font-size: 1.2rem; margin: 0; }
-        #chat-window { flex-grow: 1; overflow-y: auto; padding: 16px; }
         .message { display: flex; margin-bottom: 12px; max-width: 90%; }
         .message .content { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.5; }
         .message.user { justify-content: flex-end; margin-left: auto; }
@@ -141,7 +140,7 @@
 <body>
     <div class="app-container">
         <main id="chat-view" style="display: flex; flex-direction: column; height: 100%;">
-            <header class="app-header"><h1>Samar Ai</h1></header>
+            <!-- The header element was here and has been removed. -->
             <div id="chat-window"></div>
             <div id="status-bar">
                 <div id="connection-status"><span class="dot yellow"></span>Initializing...</div>
