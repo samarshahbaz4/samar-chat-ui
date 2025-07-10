@@ -275,4 +275,89 @@
                 if (!models || models.length === 0) { modelSelect.innerHTML = '<option>No models found</option>'; updateStatus('error', 'No models found'); return; }
                 models.forEach(model => { const option = document.createElement('option'); option.value = model.id; option.textContent = model.name; modelSelect.appendChild(option); });
                 if (savedModel && models.some(m => m.id === savedModel)) { modelSelect.value = savedModel; } else { modelSelect.value = models[0].id; }
-            
+                localStorage.setItem('selectedModel', modelSelect.value);
+                updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
+            }
+            mainSettingsBtn.addEventListener('click', () => settingsModal.classList.add('active'));
+            closeSettingsBtn.addEventListener('click', () => { saveAllSettings(); loadAllSettings(); settingsModal.classList.remove('active'); });
+            refreshModelsBtn.addEventListener('click', () => fetchModels(true));
+            modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); });
+            newChatBtn.addEventListener('click', () => { if (confirm('Are you sure you want to start a new chat? The current conversation will be cleared.')) { chatHistory = []; localStorage.removeItem('chatHistory'); chatWindow.innerHTML = ''; addMessage("Hello! How can I help you today?", 'ai'); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); } });
+            messageInput.addEventListener('input', () => { messageInput.style.height = 'auto'; messageInput.style.height = (messageInput.scrollHeight) + 'px'; });
+            messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && currentModelSettings.isSendOnEnter) { e.preventDefault(); chatForm.requestSubmit(); } });
+            topInputBar.addEventListener('click', (e) => { if (e.target.classList.contains('quick-prompt-btn')) { const promptText = e.target.textContent; messageInput.value += (messageInput.value.trim() ? ' ' : '') + promptText + ' '; messageInput.focus(); messageInput.dispatchEvent(new Event('input', { bubbles: true })); } });
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userInput = messageInput.value.trim();
+                if (!userInput) return;
+                updateStatus('sending');
+                addMessage(userInput, 'user');
+                if (currentModelSettings.isSaveHistory) { chatHistory.push({ role: 'user', parts: [{ text: userInput }] }); }
+                messageInput.value = ''; messageInput.dispatchEvent(new Event('input', { bubbles: true })); messageInput.focus();
+                const aiMessageElement = addMessage('', 'ai');
+                const thinkingElement = showTypingIndicator(aiMessageElement);
+                try { await callGeminiAPI(userInput, aiMessageElement); } catch (error) { console.error("API Call Failed:", error); const contentEl = aiMessageElement.querySelector('.content'); contentEl.innerHTML = `<p style="color:var(--error-color);">Error: ${error.message}.</p>`; updateStatus('error', 'Response failed'); } finally { thinkingElement?.remove(); }
+            });
+            async function callGeminiAPI(prompt, aiMessageElement) {
+                const apiKey = currentModelSettings.apiKey || DEFAULT_API_KEY;
+                const model = modelSelect.value;
+                if (!model || model === 'No models found') { throw new Error("No model selected."); }
+                const isStreaming = currentModelSettings.isStreaming;
+                const streamParam = isStreaming ? ':streamGenerateContent?alt=sse' : ':generateContent';
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}${streamParam}&key=${apiKey}`;
+                const requestBody = { contents: [...chatHistory], systemInstruction: currentModelSettings.systemPrompt ? { role: "model", parts: [{ text: currentModelSettings.systemPrompt }] } : undefined, };
+                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+                if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`); }
+                updateStatus('generating');
+                aiMessageElement.querySelector('.typing-indicator')?.remove();
+                const contentEl = aiMessageElement.querySelector('.content');
+                if (isStreaming) { await processStream(response, contentEl); } else { const data = await response.json(); const text = data.candidates[0].content.parts[0].text; renderContent(text, contentEl); if (currentModelSettings.isSaveHistory) { chatHistory.push({ role: 'model', parts: [{ text: text }] }); } }
+                updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
+            }
+            async function processStream(response, contentEl) {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = ''; let buffer = '';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    for (const line of lines) { if (line.startsWith('data: ')) { try { const json = JSON.parse(line.substring(6)); if (json.candidates && json.candidates[0].content.parts[0].text) { const chunk = json.candidates[0].content.parts[0].text; fullText += chunk; renderContent(fullText, contentEl); } } catch (e) { console.warn("Could not parse stream chunk:", line); } } }
+                }
+                if (currentModelSettings.isSaveHistory) { chatHistory.push({ role: 'model', parts: [{ text: fullText }] }); }
+            }
+            function addMessage(text, role) { const messageDiv = document.createElement('div'); messageDiv.className = `message ${role}`; const contentDiv = document.createElement('div'); contentDiv.className = 'content'; if (role !== 'ai') contentDiv.textContent = text; messageDiv.appendChild(contentDiv); chatWindow.appendChild(messageDiv); scrollToBottom(); return messageDiv; }
+            function showTypingIndicator(aiMessageElement) { const indicator = document.createElement('div'); indicator.className = 'typing-indicator'; indicator.innerHTML = `<span></span><span></span><span></span>`; aiMessageElement.querySelector('.content').appendChild(indicator); return indicator; }
+            function renderContent(text, element) { if (currentModelSettings.isMarkdown) { element.innerHTML = marked.parse(text); } else { element.textContent = text; } }
+            function scrollToBottom() { chatWindow.scrollTop = chatWindow.scrollHeight; }
+            function loadChatHistory() { if (!getSetting('isSaveHistory')) { localStorage.removeItem('chatHistory'); return; } const savedHistory = localStorage.getItem('chatHistory'); if (savedHistory) { chatHistory = JSON.parse(savedHistory); chatWindow.innerHTML = ''; chatHistory.forEach(msg => { const messageElement = addMessage('', msg.role); renderContent(msg.parts[0].text, messageElement.querySelector('.content')); }); } else { addMessage("Hello! How can I help you today?", 'ai'); } }
+            function saveChatHistory() { if (getSetting('isSaveHistory')) { localStorage.setItem('chatHistory', JSON.stringify(chatHistory)); } }
+            async function initializeApp() {
+                loadAllSettings();
+                const cachedModels = localStorage.getItem('cachedModels');
+                if (cachedModels) { populateModelDropdown(JSON.parse(cachedModels)); } else { await fetchModels(); }
+                loadChatHistory();
+                window.addEventListener('beforeunload', saveChatHistory);
+                messageInput.focus();
+            }
+            initializeApp();
+        });
+    </script>
+
+    <!-- ✅ PWA Service Worker Registration for GitHub Pages -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+
+</body>
+</html>
