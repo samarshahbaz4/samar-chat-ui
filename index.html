@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Samar Ai</title>
+
+    <!-- ✅ PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00668b">
+    <link rel="icon" href="icon.png" type="image/png">
+
     <style>
-        /* --- Core Styles & Material 3 Lite Theme --- */
         :root {
             --bg-color: #f0f2f5;
             --surface-color: #ffffff;
@@ -19,6 +24,7 @@
             --dot-blue: #007aff;
             --dot-red: #ff3b30;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0; padding: 0;
@@ -29,7 +35,6 @@
         }
         * { box-sizing: border-box; }
 
-        /* --- Main App Layout --- */
         .app-container {
             display: flex; flex-direction: column;
             height: 100%; width: 100%;
@@ -38,7 +43,6 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        /* --- Header --- */
         .app-header {
             display: flex; justify-content: center; align-items: center;
             padding: 14px 16px;
@@ -48,7 +52,6 @@
         }
         .app-header h1 { font-size: 1.2rem; margin: 0; }
 
-        /* --- Chat Area --- */
         #chat-window { flex-grow: 1; overflow-y: auto; padding: 16px; }
         .message { display: flex; margin-bottom: 12px; max-width: 90%; }
         .message .content { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.5; }
@@ -56,17 +59,7 @@
         .message.user .content { background-color: var(--primary-color); color: var(--on-primary-color); border-bottom-right-radius: 4px; }
         .message.ai { justify-content: flex-start; margin-right: auto; }
         .message.ai .content { background-color: var(--bg-color); color: var(--text-primary-color); border-bottom-left-radius: 4px; }
-        .message .content p { margin: 0 0 10px; }
-        .message .content p:last-child { margin-bottom: 0; }
-        .message .content ul, .message .content ol { padding-left: 20px; }
-        .message .content pre { background-color: #2d2d2d; color: #e3e3e3; padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
-        .typing-indicator { display: flex; align-items: center; padding: 10px 14px; }
-        .typing-indicator span { height: 8px; width: 8px; margin: 0 2px; background-color: var(--text-secondary-color); border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
 
-        /* --- NEW: Status Bar --- */
         #status-bar {
             display: flex;
             justify-content: space-between;
@@ -76,6 +69,7 @@
             background-color: var(--surface-color);
             flex-shrink: 0;
         }
+
         #connection-status {
             display: flex;
             align-items: center;
@@ -89,8 +83,7 @@
         }
         .dot.green { background-color: var(--dot-green); }
         .dot.yellow { background-color: var(--dot-yellow); }
-        .dot.blue { background-color: var(--dot-blue); }
-        .dot.red { background-color: var(--dot-red); }
+
         #new-chat-btn {
             background: none;
             border: 1px solid var(--border-color);
@@ -101,7 +94,6 @@
             cursor: pointer;
         }
 
-        /* --- Input Area --- */
         #chat-form {
             display: flex;
             flex-direction: column;
@@ -111,482 +103,58 @@
             flex-shrink: 0;
             gap: 8px;
         }
-        #top-input-bar { display: flex; align-items: center; gap: 8px; }
-        .quick-prompt-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; }
-        #main-model-select { margin-left: auto; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 16px; font-size: 0.85rem; background-color: var(--bg-color); max-width: 120px; flex-shrink: 0; height: 32px; }
-        .icon-btn { background: none; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary-color); flex-shrink: 0; padding: 0; }
-        .input-row { display: flex; align-items: flex-end; width: 100%; gap: 8px; }
-        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 16px; font-size: 1rem; resize: none; max-height: 100px; }
-        #message-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 20%, transparent); }
-        #send-button { background-color: var(--primary-color); color: var(--on-primary-color); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
-        #send-button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
 
-        /* --- Settings Modal (No changes) --- */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
-        .modal-content { background-color: var(--bg-color); position: absolute; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%; box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; animation: slideIn 0.3s forwards; }
-        .modal.active { display: block; }
-        .modal.active .modal-content { right: 0; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { right: -100%; } to { right: 0; } }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background-color: var(--surface-color); border-bottom: 1px solid var(--border-color); }
-        .modal-header h2 { margin: 0; font-size: 1.2rem; }
-        .close-btn { font-size: 2rem; background: none; border: none; cursor: pointer; }
-        .modal-body { padding: 16px; overflow-y: auto; flex-grow: 1; }
-        .settings-group { background-color: var(--surface-color); border-radius: 12px; margin-bottom: 16px; padding: 8px 16px; }
-        .settings-group h3 { font-size: 1rem; color: var(--primary-color); margin-bottom: 12px; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--bg-color); }
-        .setting-item:last-child { border-bottom: none; }
-        .setting-item label { font-size: 1rem; }
-        .setting-item small { font-size: 0.8rem; color: var(--text-secondary-color); display: block; margin-top: 4px; }
-        .setting-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; margin-top: 8px; }
-        .refresh-btn-container { display: flex; justify-content: center; padding-top: 8px; }
-        .refresh-btn { padding: 8px 16px; font-size: 0.9rem; border-radius: 20px; border: 1px solid var(--primary-color); background: none; color: var(--primary-color); cursor: pointer; }
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(20px); }
-        .modal-footer { padding: 16px; text-align: center; font-size: 0.8rem; color: var(--text-secondary-color); border-top: 1px solid var(--border-color); background-color: var(--surface-color); }
+        .input-row { display: flex; align-items: flex-end; width: 100%; gap: 8px; }
+        #message-input {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 1rem;
+            resize: none;
+            max-height: 100px;
+        }
+
+        #send-button {
+            background-color: var(--primary-color);
+            color: var(--on-primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
-
     <div class="app-container">
-        <main id="chat-view" style="display: flex; flex-direction: column; height: 100%;">
-            <header class="app-header">
-                <h1>Samar Ai</h1>
-            </header>
-            <div id="chat-window"></div>
-            
-            <!-- NEW: Status Bar -->
-            <div id="status-bar">
-                <div id="connection-status">
-                    <span class="dot yellow"></span>Initializing...
-                </div>
-                <button id="new-chat-btn" type="button">New Chat</button>
-            </div>
+        <header class="app-header">
+            <h1>Samar Ai</h1>
+        </header>
 
-            <form id="chat-form">
-                <div id="top-input-bar">
-                    <button type="button" class="quick-prompt-btn">Explain:</button>
-                    <button type="button" class="quick-prompt-btn">Tell briefly:</button>
-                    <select id="main-model-select" class="main-model-select" aria-label="Select Model"></select>
-                    <button id="main-settings-btn" type="button" class="icon-btn" aria-label="Open Settings">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </button>
-                </div>
-                <div class="input-row">
-                    <textarea id="message-input" placeholder="Chat with Gemini..." rows="1" autofocus></textarea>
-                    <button id="send-button" type="submit" aria-label="Send Message">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    </button>
-                </div>
-            </form>
-        </main>
-    </div>
+        <div id="chat-window"></div>
 
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <header class="modal-header">
-                <h2>Settings</h2>
-                <button id="close-settings-btn" class="close-btn" aria-label="Close Settings">&times;</button>
-            </header>
-            <div class="modal-body">
-                <div class="settings-group">
-                    <h3>API & Model</h3>
-                    <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-                        <label for="api-key-input">Gemini API Key</label>
-                        <small>Overrides the default key. Stored locally.</small>
-                        <input type="password" id="api-key-input" class="setting-input" placeholder="Enter your key">
-                    </div>
-                    <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-                        <label for="system-prompt-input">System Prompt</label>
-                        <small>Defines the AI's default behavior.</small>
-                        <textarea id="system-prompt-input" class="setting-input" rows="3" placeholder="e.g., You are a helpful medical tutor."></textarea>
-                    </div>
-                    <div class="refresh-btn-container">
-                        <button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button>
-                    </div>
-                </div>
-                <div class="settings-group">
-                    <h3>Chat Behavior</h3>
-                    <div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div>
-                    <div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div>
-                </div>
-                <div class="settings-group">
-                    <h3>Other Settings</h3>
-                    <div class="setting-item"><label for="send-on-enter-toggle">Send on Enter Key</label><label class="switch"><input type="checkbox" id="send-on-enter-toggle"><span class="slider"></span></label></div>
-                    <div class="setting-item"><label for="save-history-toggle">Save Chat History</label><label class="switch"><input type="checkbox" id="save-history-toggle"><span class="slider"></span></label></div>
-                </div>
+        <div id="status-bar">
+            <div id="connection-status">
+                <span class="dot yellow"></span>Initializing...
             </div>
-            <footer class="modal-footer">
-                <p>This app is created by Samar Shahbaz MBBS’29.</p>
-            </footer>
+            <button id="new-chat-btn" type="button">New Chat</button>
         </div>
+
+        <form id="chat-form">
+            <div class="input-row">
+                <textarea id="message-input" placeholder="Chat with Samar..." rows="1" autofocus></textarea>
+                <button id="send-button" type="submit" aria-label="Send Message">➤</button>
+            </div>
+        </form>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
+
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- DOM Elements ---
-        const chatWindow = document.getElementById('chat-window');
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
-        const sendButton = document.getElementById('send-button');
-        const mainSettingsBtn = document.getElementById('main-settings-btn');
-        const closeSettingsBtn = document.getElementById('close-settings-btn');
-        const settingsModal = document.getElementById('settings-modal');
-        const topInputBar = document.getElementById('top-input-bar');
-        const refreshModelsBtn = document.getElementById('refresh-models-btn');
-        const modelSelect = document.getElementById('main-model-select');
-        const connectionStatus = document.getElementById('connection-status'); // NEW
-        const newChatBtn = document.getElementById('new-chat-btn'); // NEW
-
-        // Settings Inputs
-        const apiKeyInput = document.getElementById('api-key-input');
-        const systemPromptInput = document.getElementById('system-prompt-input');
-        const streamingToggle = document.getElementById('streaming-toggle');
-        const markdownToggle = document.getElementById('markdown-toggle');
-        const sendOnEnterToggle = document.getElementById('send-on-enter-toggle');
-        const saveHistoryToggle = document.getElementById('save-history-toggle');
-        
-        // --- State and Configuration ---
-        const DEFAULT_API_KEY = "AIzaSyDnKMIXmkQLSteQbFfS6mmsUJACZQm4bJo";
-        let chatHistory = [];
-        let currentModelSettings = {};
-
-        // --- NEW: Status Indicator Logic ---
-        function updateStatus(state, text = '') {
-            let color = 'yellow';
-            let message = text;
-            switch (state) {
-                case 'ready':
-                    color = 'green';
-                    message = `Ready (${text})`;
-                    sendButton.disabled = false;
-                    break;
-                case 'sending':
-                    color = 'yellow';
-                    message = 'Sending...';
-                    sendButton.disabled = true;
-                    break;
-                case 'generating':
-                    color = 'blue';
-                    message = 'Generating...';
-                    sendButton.disabled = true;
-                    break;
-                case 'error':
-                    color = 'red';
-                    message = `Error: ${text}`;
-                    sendButton.disabled = false;
-                    break;
-                default:
-                    message = 'Initializing...';
-                    sendButton.disabled = true;
-            }
-            connectionStatus.innerHTML = `<span class="dot ${color}"></span>${message}`;
-        }
-
-        // --- Settings Management ---
-        const settingsConfig = {
-            'apiKey': { el: apiKeyInput, type: 'value', default: '' },
-            'systemPrompt': { el: systemPromptInput, type: 'value', default: 'You are a helpful AI assistant.' },
-            'isStreaming': { el: streamingToggle, type: 'checked', default: true },
-            'isMarkdown': { el: markdownToggle, type: 'checked', default: true },
-            'isSendOnEnter': { el: sendOnEnterToggle, type: 'checked', default: false },
-            'isSaveHistory': { el: saveHistoryToggle, type: 'checked', default: true },
-        };
-        
-        function getSetting(key) {
-            const storedValue = localStorage.getItem(`settings_global_${key}`);
-            return storedValue !== null ? JSON.parse(storedValue) : settingsConfig[key].default;
-        }
-        function saveSetting(key, value) { localStorage.setItem(`settings_global_${key}`, JSON.stringify(value)); }
-        function loadAllSettings() {
-            for (const key in settingsConfig) {
-                const value = getSetting(key);
-                currentModelSettings[key] = value;
-                const config = settingsConfig[key];
-                if (config.el) config.el[config.type] = value;
-            }
-        }
-        function saveAllSettings() {
-            for (const key in settingsConfig) {
-                const config = settingsConfig[key];
-                if (config.el) saveSetting(key, config.el[config.type]);
-            }
-        }
-
-        // --- Model Fetching & Caching ---
-        async function fetchModels(isManualRefresh = false) {
-            refreshModelsBtn.disabled = true;
-            refreshModelsBtn.textContent = 'Refreshing...';
-            const apiKey = getSetting('apiKey') || DEFAULT_API_KEY;
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-            
-            try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const data = await response.json();
-                const chatModels = data.models
-                    .filter(m => m.supportedGenerationMethods.includes('generateContent'))
-                    .map(m => ({ id: m.name.split('/')[1], name: m.displayName }));
-                
-                localStorage.setItem('cachedModels', JSON.stringify(chatModels));
-                populateModelDropdown(chatModels);
-                if (isManualRefresh) alert('Model list updated successfully!');
-            } catch (error) {
-                console.error("Failed to fetch models:", error);
-                updateStatus('error', 'Model fetch failed');
-                if (isManualRefresh) alert(`Could not refresh models. Error: ${error.message}`);
-            } finally {
-                refreshModelsBtn.disabled = false;
-                refreshModelsBtn.textContent = 'Refresh Model List';
-            }
-        }
-
-        function populateModelDropdown(models) {
-            const savedModel = localStorage.getItem('selectedModel');
-            modelSelect.innerHTML = '';
-            if (!models || models.length === 0) {
-                modelSelect.innerHTML = '<option>No models found</option>';
-                updateStatus('error', 'No models found');
-                return;
-            }
-            models.forEach(model => {
-                const option = document.createElement('option');
-                option.value = model.id;
-                option.textContent = model.name;
-                modelSelect.appendChild(option);
-            });
-
-            if (savedModel && models.some(m => m.id === savedModel)) {
-                modelSelect.value = savedModel;
-            } else {
-                modelSelect.value = models[0].id;
-            }
-            localStorage.setItem('selectedModel', modelSelect.value);
-            updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
-        }
-
-        // --- UI & Event Handlers ---
-        mainSettingsBtn.addEventListener('click', () => settingsModal.classList.add('active'));
-        closeSettingsBtn.addEventListener('click', () => {
-            saveAllSettings();
-            loadAllSettings();
-            settingsModal.classList.remove('active');
-        });
-        refreshModelsBtn.addEventListener('click', () => fetchModels(true));
-        modelSelect.addEventListener('change', () => {
-            localStorage.setItem('selectedModel', modelSelect.value);
-            updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
-        });
-        
-        newChatBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to start a new chat? The current conversation will be cleared.')) {
-                chatHistory = [];
-                localStorage.removeItem('chatHistory');
-                chatWindow.innerHTML = '';
-                addMessage("Hello! How can I help you today?", 'ai');
-                updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
-            }
-        });
-
-        messageInput.addEventListener('input', () => {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = (messageInput.scrollHeight) + 'px';
-        });
-        messageInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && currentModelSettings.isSendOnEnter) {
-                e.preventDefault();
-                chatForm.requestSubmit();
-            }
-        });
-        topInputBar.addEventListener('click', (e) => {
-            if (e.target.classList.contains('quick-prompt-btn')) {
-                const promptText = e.target.textContent;
-                messageInput.value += (messageInput.value.trim() ? ' ' : '') + promptText + ' ';
-                messageInput.focus();
-                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        });
-
-        // --- Core Chat Logic ---
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const userInput = messageInput.value.trim();
-            if (!userInput) return;
-
-            updateStatus('sending');
-            addMessage(userInput, 'user');
-            if (currentModelSettings.isSaveHistory) {
-                chatHistory.push({ role: 'user', parts: [{ text: userInput }] });
-            }
-            messageInput.value = '';
-            messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-            messageInput.focus();
-
-            const aiMessageElement = addMessage('', 'ai');
-            const thinkingElement = showTypingIndicator(aiMessageElement);
-
-            try {
-                await callGeminiAPI(userInput, aiMessageElement);
-            } catch (error) {
-                console.error("API Call Failed:", error);
-                const contentEl = aiMessageElement.querySelector('.content');
-                contentEl.innerHTML = `<p style="color:var(--error-color);">Error: ${error.message}.</p>`;
-                updateStatus('error', 'Response failed');
-            } finally {
-                thinkingElement?.remove();
-            }
-        });
-
-        async function callGeminiAPI(prompt, aiMessageElement) {
-            const apiKey = currentModelSettings.apiKey || DEFAULT_API_KEY;
-            const model = modelSelect.value;
-            if (!model || model === 'No models found') {
-                throw new Error("No model selected.");
-            }
-            const isStreaming = currentModelSettings.isStreaming;
-            
-            const streamParam = isStreaming ? ':streamGenerateContent?alt=sse' : ':generateContent';
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}${streamParam}&key=${apiKey}`;
-
-            // The entire chat history is sent with each request to maintain context.
-            const requestBody = {
-                contents: [...chatHistory],
-                systemInstruction: currentModelSettings.systemPrompt ? { role: "model", parts: [{ text: currentModelSettings.systemPrompt }] } : undefined,
-            };
-
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
-            }
-            
-            updateStatus('generating');
-            aiMessageElement.querySelector('.typing-indicator')?.remove();
-            const contentEl = aiMessageElement.querySelector('.content');
-
-            if (isStreaming) {
-                await processStream(response, contentEl);
-            } else {
-                const data = await response.json();
-                const text = data.candidates[0].content.parts[0].text;
-                renderContent(text, contentEl);
-                 if (currentModelSettings.isSaveHistory) {
-                    chatHistory.push({ role: 'model', parts: [{ text: text }] });
-                }
-            }
-            updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
-        }
-        
-        async function processStream(response, contentEl) {
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullText = '';
-            let buffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop();
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        try {
-                            const json = JSON.parse(line.substring(6));
-                            if (json.candidates && json.candidates[0].content.parts[0].text) {
-                                const chunk = json.candidates[0].content.parts[0].text;
-                                fullText += chunk;
-                                renderContent(fullText, contentEl);
-                            }
-                        } catch (e) { console.warn("Could not parse stream chunk:", line); }
-                    }
-                }
-            }
-            if (currentModelSettings.isSaveHistory) {
-                chatHistory.push({ role: 'model', parts: [{ text: fullText }] });
-            }
-        }
-
-        // --- UI Rendering ---
-        function addMessage(text, role) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'content';
-            if (role !== 'ai') contentDiv.textContent = text;
-            messageDiv.appendChild(contentDiv);
-            chatWindow.appendChild(messageDiv);
-            scrollToBottom();
-            return messageDiv;
-        }
-        function showTypingIndicator(aiMessageElement) {
-            const indicator = document.createElement('div');
-            indicator.className = 'typing-indicator';
-            indicator.innerHTML = `<span></span><span></span><span></span>`;
-            aiMessageElement.querySelector('.content').appendChild(indicator);
-            return indicator;
-        }
-        function renderContent(text, element) {
-            if (currentModelSettings.isMarkdown) {
-                element.innerHTML = marked.parse(text);
-            } else {
-                element.textContent = text;
-            }
-        }
-        function scrollToBottom() { chatWindow.scrollTop = chatWindow.scrollHeight; }
-        
-        function loadChatHistory() {
-            if (!getSetting('isSaveHistory')) {
-                 localStorage.removeItem('chatHistory');
-                 return;
-            }
-            const savedHistory = localStorage.getItem('chatHistory');
-            if (savedHistory) {
-                chatHistory = JSON.parse(savedHistory);
-                chatWindow.innerHTML = '';
-                chatHistory.forEach(msg => {
-                   const messageElement = addMessage('', msg.role);
-                   renderContent(msg.parts[0].text, messageElement.querySelector('.content'));
-                });
-            } else {
-                 addMessage("Hello! How can I help you today?", 'ai');
-            }
-        }
-        function saveChatHistory() {
-            if (getSetting('isSaveHistory')) {
-                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-            }
-        }
-        
-        // --- Initialization ---
-        async function initializeApp() {
-            loadAllSettings();
-            const cachedModels = localStorage.getItem('cachedModels');
-            if (cachedModels) {
-                populateModelDropdown(JSON.parse(cachedModels));
-            } else {
-                await fetchModels();
-            }
-            loadChatHistory();
-            window.addEventListener('beforeunload', saveChatHistory);
-            messageInput.focus();
-        }
-
-        initializeApp();
-    });
+        // Optional JS functionality...
     </script>
-
 </body>
 </html>
