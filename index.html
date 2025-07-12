@@ -169,7 +169,8 @@
                     </button>
                 </div>
                 <div class="input-row">
-                    <textarea id="message-input" placeholder="Chat with Gemini..." rows="1" autofocus></textarea>
+                    <!-- ✅ HTML: Updated placeholder text -->
+                    <textarea id="message-input" placeholder="Chat with Ai..." rows="1" autofocus></textarea>
                     <button id="send-button" type="submit" aria-label="Send Message"></button>
                 </div>
             </form>
@@ -180,8 +181,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
+        // The JavaScript from the previous step remains unchanged.
         document.addEventListener('DOMContentLoaded', () => {
-            // All constant declarations...
             const chatWindow = document.getElementById('chat-window');
             const chatForm = document.getElementById('chat-form');
             const messageInput = document.getElementById('message-input');
@@ -211,7 +212,6 @@
             const sendIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
             const stopIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>`;
 
-            // All functions...
             function setSendButtonState(state) { if (state === 'stop') { sendButton.innerHTML = stopIconSVG; sendButton.classList.add('stop-generating'); sendButton.setAttribute('aria-label', 'Stop Generating'); sendButton.disabled = false; } else { sendButton.innerHTML = sendIconSVG; sendButton.classList.remove('stop-generating'); sendButton.setAttribute('aria-label', 'Send Message'); } }
             function updateStatus(state, text = '') { let color = 'yellow'; let message = text; setSendButtonState('send'); sendButton.disabled = false; switch (state) { case 'ready': color = 'green'; message = `Ready (${text})`; break; case 'sending': color = 'yellow'; message = 'Sending...'; sendButton.disabled = true; break; case 'generating': color = 'blue'; message = 'Generating...'; setSendButtonState('stop'); break; case 'error': color = 'red'; message = `Error: ${text}`; break; case 'stopped': color = 'yellow'; message = 'Stopped'; break; default: message = 'Initializing...'; sendButton.disabled = true; } connectionStatus.innerHTML = `<span class="dot ${color}"></span>${message}`; }
             const settingsConfig = { 'apiKey': { el: apiKeyInput, type: 'value', default: '' }, 'systemPrompt': { el: systemPromptInput, type: 'value', default: 'You are a helpful AI assistant.' }, 'isStreaming': { el: streamingToggle, type: 'checked', default: true }, 'isMarkdown': { el: markdownToggle, type: 'checked', default: true }, 'isSendOnEnter': { el: sendOnEnterToggle, type: 'checked', default: false }, 'isSaveHistory': { el: saveHistoryToggle, type: 'checked', default: true }, };
@@ -249,9 +249,8 @@
                 const target = e.target.closest('button');
                 if (!target) return;
                 
-                // ✅ CORRECTED: Copy Button Logic
                 if (target.classList.contains('copy-btn')) {
-                    const contentEl = target.previousElementSibling; // Find the sibling .content div
+                    const contentEl = target.previousElementSibling; 
                     if (!contentEl) return;
                     
                     const textToCopy = contentEl.innerText;
@@ -271,7 +270,6 @@
                         console.error('Failed to copy text: ', err);
                     }
                 } 
-                // Retry Button Logic
                 else if (target.classList.contains('retry-btn')) {
                     const aiMessageElement = target.closest('.message.ai');
                     const failedPrompt = aiMessageElement.dataset.failedPrompt;
@@ -354,7 +352,6 @@
                 return fullText;
             }
 
-            // ✅ CORRECTED: addMessage function
             function addMessage(text, role) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${role}`;
@@ -365,7 +362,6 @@
                     contentDiv.textContent = text;
                     messageDiv.appendChild(contentDiv);
                 } else {
-                    // For AI messages, add content div first, then the copy button as a sibling.
                     messageDiv.appendChild(contentDiv);
                     
                     const copyButton = document.createElement('button');
