@@ -47,7 +47,7 @@
             border-top: 1px solid var(--border-color);
             scroll-behavior: smooth; 
         }
-        .message { display: flex; margin-bottom: 12px; max-width: 90%; }
+        .message { display: flex; margin-bottom: 12px; max-width: 90%; position: relative; }
         .message .content { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.5; }
         .message.user { justify-content: flex-end; margin-left: auto; }
         .message.user .content { background-color: var(--primary-color); color: var(--on-primary-color); border-bottom-right-radius: 4px; }
@@ -59,126 +59,66 @@
         .message .content ul, .message .content ol { padding-left: 20px; }
         .message .content pre { background-color: #2d2d2d; color: #e3e3e3; padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; margin: 1em 0; }
         
-        .table-wrapper {
-            overflow-x: auto; 
-            margin: 1em 0;
-        }
-        .message .content table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed; 
-            border: 1px solid var(--border-color);
-        }
-        .message .content th,
-        .message .content td {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            text-align: left;
-            white-space: normal;
-            word-wrap: break-word; 
-        }
-        .message .content th {
-            background-color: color-mix(in srgb, var(--bg-color) 70%, white);
-            font-weight: 600;
-        }
-
-        #status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 12px;
-            border-top: 1px solid var(--border-color);
+        .copy-btn {
+            position: absolute;
+            bottom: 8px;
+            right: -36px;
             background-color: var(--surface-color);
-            flex-shrink: 0;
-        }
-        #connection-status {
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
+            justify-content: center;
             color: var(--text-secondary-color);
+            opacity: 0;
+            transition: opacity 0.2s, color 0.2s;
         }
-        #connection-status .dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-        }
+        .message.ai:hover .copy-btn { opacity: 1; }
+        .copy-btn.copied { color: var(--dot-green); }
+
+        .table-wrapper { overflow-x: auto; margin: 1em 0; }
+        .message .content table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border-color); }
+        .message .content th, .message .content td { padding: 8px 12px; border: 1px solid var(--border-color); text-align: left; white-space: normal; word-wrap: break-word; }
+        .message .content th { background-color: color-mix(in srgb, var(--bg-color) 70%, white); font-weight: 600; }
+
+        #status-bar { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px; border-top: 1px solid var(--border-color); background-color: var(--surface-color); flex-shrink: 0; }
+        #connection-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-secondary-color); }
+        #connection-status .dot { width: 8px; height: 8px; border-radius: 50%; }
         .dot.green { background-color: var(--dot-green); }
         .dot.yellow { background-color: var(--dot-yellow); }
         .dot.blue { background-color: var(--dot-blue); }
         .dot.red { background-color: var(--dot-red); }
         
-        #status-bar-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .scroll-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary-color);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 1.1rem;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #new-chat-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary-color);
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
+        #status-bar-right { display: flex; align-items: center; gap: 8px; }
+        .scroll-btn, #new-chat-btn, .quick-prompt-btn, .icon-btn, .retry-btn, .refresh-btn, .copy-btn { transition: transform 0.1s, background-color 0.1s; }
+        .scroll-btn:active, #new-chat-btn:active, .quick-prompt-btn:active, .icon-btn:active, .retry-btn:active, .refresh-btn:active, .copy-btn:active { transform: scale(0.95); background-color: var(--bg-color); } 
         
-        /* ✅ NEW CSS FOR THE RETRY BUTTON */
-        .error-container {
-            text-align: center;
-        }
-        .error-container p {
-            color: var(--dot-red);
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-        .retry-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary-color);
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .retry-btn:hover {
-            background-color: color-mix(in srgb, var(--border-color) 40%, transparent);
-        }
+        .scroll-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); width: 28px; height: 28px; border-radius: 50%; font-size: 1.1rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        #new-chat-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; cursor: pointer; }
+        
+        .error-container { text-align: center; }
+        .error-container p { color: var(--dot-red); font-size: 0.9rem; margin-bottom: 8px; }
+        .retry-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 
-        #chat-form {
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            border-top: 1px solid var(--bg-color);
-            background-color: var(--surface-color);
-            flex-shrink: 0;
-            gap: 8px;
-        }
+        #chat-form { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid var(--bg-color); background-color: var(--surface-color); flex-shrink: 0; gap: 8px; }
         #top-input-bar { display: flex; align-items: center; gap: 8px; }
         .quick-prompt-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; }
+
         #main-model-select { margin-left: auto; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 16px; font-size: 0.85rem; background-color: var(--bg-color); max-width: 120px; flex-shrink: 0; height: 32px; }
         .icon-btn { background: none; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary-color); flex-shrink: 0; padding: 0; }
+        
         .input-row { display: flex; align-items: flex-end; width: 100%; gap: 8px; }
-        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 16px; font-size: 1rem; resize: none; max-height: 100px; }
+        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 16px; font-size: 1rem; resize: none; max-height: 150px; overflow-y: auto; } 
         #message-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 20%, transparent); }
-        #send-button { background-color: var(--primary-color); color: var(--on-primary-color); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        
+        #send-button { background-color: var(--primary-color); color: var(--on-primary-color); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: transform 0.1s, background-color 0.2s; }
+        #send-button:active { transform: scale(0.92); } 
         #send-button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
+        #send-button.stop-generating { background-color: var(--dot-red); }
+
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
         .modal-content { background-color: var(--bg-color); position: absolute; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%; box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; animation: slideIn 0.3s forwards; }
         .modal.active { display: block; }
@@ -230,57 +170,18 @@
                 </div>
                 <div class="input-row">
                     <textarea id="message-input" placeholder="Chat with Gemini..." rows="1" autofocus></textarea>
-                    <button id="send-button" type="submit" aria-label="Send Message">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    </button>
+                    <button id="send-button" type="submit" aria-label="Send Message"></button>
                 </div>
             </form>
         </main>
     </div>
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <header class="modal-header">
-                <h2>Settings</h2>
-                <button id="close-settings-btn" class="close-btn" aria-label="Close Settings">×</button>
-            </header>
-            <div class="modal-body">
-                <div class="settings-group">
-                    <h3>API & Model</h3>
-                    <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-                        <label for="api-key-input">Gemini API Key</label>
-                        <small>Overrides the default key. Stored locally.</small>
-                        <input type="password" id="api-key-input" class="setting-input" placeholder="Enter your key">
-                    </div>
-                    <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-                        <label for="system-prompt-input">System Prompt</label>
-                        <small>Defines the AI's default behavior.</small>
-                        <textarea id="system-prompt-input" class="setting-input" rows="3" placeholder="e.g., You are a helpful medical tutor."></textarea>
-                    </div>
-                    <div class="refresh-btn-container">
-                        <button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button>
-                    </div>
-                </div>
-                <div class="settings-group">
-                    <h3>Chat Behavior</h3>
-                    <div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div>
-                    <div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div>
-                </div>
-                <div class="settings-group">
-                    <h3>Other Settings</h3>
-                    <div class="setting-item"><label for="send-on-enter-toggle">Send on Enter Key</label><label class="switch"><input type="checkbox" id="send-on-enter-toggle"><span class="slider"></span></label></div>
-                    <div class="setting-item"><label for="save-history-toggle">Save Chat History</label><label class="switch"><input type="checkbox" id="save-history-toggle"><span class="slider"></span></label></div>
-                </div>
-            </div>
-            <footer class="modal-footer">
-                <p>This app is created by Samar Shahbaz MBBS’29.</p>
-            </footer>
-        </div>
-    </div>
+    <div id="settings-modal" class="modal"><div class="modal-content"><header class="modal-header"><h2>Settings</h2><button id="close-settings-btn" class="close-btn" aria-label="Close Settings">×</button></header><div class="modal-body"><div class="settings-group"><h3>API & Model</h3><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="api-key-input">Gemini API Key</label><small>Overrides the default key. Stored locally.</small><input type="password" id="api-key-input" class="setting-input" placeholder="Enter your key"></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="system-prompt-input">System Prompt</label><small>Defines the AI's default behavior.</small><textarea id="system-prompt-input" class="setting-input" rows="3" placeholder="e.g., You are a helpful medical tutor."></textarea></div><div class="refresh-btn-container"><button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button></div></div><div class="settings-group"><h3>Chat Behavior</h3><div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div></div><div class="settings-group"><h3>Other Settings</h3><div class="setting-item"><label for="send-on-enter-toggle">Send on Enter Key</label><label class="switch"><input type="checkbox" id="send-on-enter-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="save-history-toggle">Save Chat History</label><label class="switch"><input type="checkbox" id="save-history-toggle"><span class="slider"></span></label></div></div></div><footer class="modal-footer"><p>This app is created by Samar Shahbaz MBBS’29.</p></footer></div></div>
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // All constant declarations...
             const chatWindow = document.getElementById('chat-window');
             const chatForm = document.getElementById('chat-form');
             const messageInput = document.getElementById('message-input');
@@ -301,217 +202,148 @@
             const saveHistoryToggle = document.getElementById('save-history-toggle');
             const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
             const scrollToBottomBtn = document.getElementById('scroll-to-bottom-btn');
-
+            
             const DEFAULT_API_KEY = "AIzaSyDnKMIXmkQLSteQbFfS6mmsUJACZQm4bJo";
             let chatHistory = [];
             let currentModelSettings = {};
-            function updateStatus(state, text = '') {
-                let color = 'yellow';
-                let message = text;
-                switch (state) {
-                    case 'ready': color = 'green'; message = `Ready (${text})`; sendButton.disabled = false; break;
-                    case 'sending': color = 'yellow'; message = 'Sending...'; sendButton.disabled = true; break;
-                    case 'generating': color = 'blue'; message = 'Generating...'; sendButton.disabled = true; break;
-                    case 'error': color = 'red'; message = `Error: ${text}`; sendButton.disabled = false; break;
-                    default: message = 'Initializing...'; sendButton.disabled = true;
-                }
-                connectionStatus.innerHTML = `<span class="dot ${color}"></span>${message}`;
-            }
+            let abortController = null;
+
+            const sendIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
+            const stopIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>`;
+
+            // All functions...
+            function setSendButtonState(state) { if (state === 'stop') { sendButton.innerHTML = stopIconSVG; sendButton.classList.add('stop-generating'); sendButton.setAttribute('aria-label', 'Stop Generating'); sendButton.disabled = false; } else { sendButton.innerHTML = sendIconSVG; sendButton.classList.remove('stop-generating'); sendButton.setAttribute('aria-label', 'Send Message'); } }
+            function updateStatus(state, text = '') { let color = 'yellow'; let message = text; setSendButtonState('send'); sendButton.disabled = false; switch (state) { case 'ready': color = 'green'; message = `Ready (${text})`; break; case 'sending': color = 'yellow'; message = 'Sending...'; sendButton.disabled = true; break; case 'generating': color = 'blue'; message = 'Generating...'; setSendButtonState('stop'); break; case 'error': color = 'red'; message = `Error: ${text}`; break; case 'stopped': color = 'yellow'; message = 'Stopped'; break; default: message = 'Initializing...'; sendButton.disabled = true; } connectionStatus.innerHTML = `<span class="dot ${color}"></span>${message}`; }
             const settingsConfig = { 'apiKey': { el: apiKeyInput, type: 'value', default: '' }, 'systemPrompt': { el: systemPromptInput, type: 'value', default: 'You are a helpful AI assistant.' }, 'isStreaming': { el: streamingToggle, type: 'checked', default: true }, 'isMarkdown': { el: markdownToggle, type: 'checked', default: true }, 'isSendOnEnter': { el: sendOnEnterToggle, type: 'checked', default: false }, 'isSaveHistory': { el: saveHistoryToggle, type: 'checked', default: true }, };
             function getSetting(key) { const storedValue = localStorage.getItem(`settings_global_${key}`); return storedValue !== null ? JSON.parse(storedValue) : settingsConfig[key].default; }
             function saveSetting(key, value) { localStorage.setItem(`settings_global_${key}`, JSON.stringify(value)); }
             function loadAllSettings() { for (const key in settingsConfig) { const value = getSetting(key); currentModelSettings[key] = value; const config = settingsConfig[key]; if (config.el) config.el[config.type] = value; } }
             function saveAllSettings() { for (const key in settingsConfig) { const config = settingsConfig[key]; if (config.el) saveSetting(key, config.el[config.type]); } }
-            async function fetchModels(isManualRefresh = false) {
-                refreshModelsBtn.disabled = true; refreshModelsBtn.textContent = 'Refreshing...';
-                const apiKey = getSetting('apiKey') || DEFAULT_API_KEY;
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-                try {
-                    const response = await fetch(API_URL);
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    const data = await response.json();
-                    const chatModels = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => ({ id: m.name.split('/')[1], name: m.displayName }));
-                    localStorage.setItem('cachedModels', JSON.stringify(chatModels));
-                    populateModelDropdown(chatModels);
-                    if (isManualRefresh) alert('Model list updated successfully!');
-                } catch (error) {
-                    console.error("Failed to fetch models:", error);
-                    updateStatus('error', 'Model fetch failed');
-                    if (isManualRefresh) alert(`Could not refresh models. Error: ${error.message}`);
-                } finally {
-                    refreshModelsBtn.disabled = false; refreshModelsBtn.textContent = 'Refresh Model List';
-                }
-            }
-            
-            function populateModelDropdown(models) {
-                const savedModel = localStorage.getItem('selectedModel');
-                const PREFERRED_DEFAULT_MODEL = 'gemini-1.5-flash-latest';
-                modelSelect.innerHTML = '';
-                if (!models || models.length === 0) {
-                    modelSelect.innerHTML = '<option>No models found</option>';
-                    updateStatus('error', 'No models found');
-                    return;
-                }
-                models.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model.id;
-                    option.textContent = model.name;
-                    modelSelect.appendChild(option);
-                });
-                if (savedModel && models.some(m => m.id === savedModel)) {
-                    modelSelect.value = savedModel;
-                } else if (models.some(m => m.id === PREFERRED_DEFAULT_MODEL)) {
-                    modelSelect.value = PREFERRED_DEFAULT_MODEL;
-                } else if (models.length > 0) {
-                    modelSelect.value = models[0].id;
-                }
-                localStorage.setItem('selectedModel', modelSelect.value);
-                updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
-            }
-
+            async function fetchModels(isManualRefresh = false) { refreshModelsBtn.disabled = true; refreshModelsBtn.textContent = 'Refreshing...'; const apiKey = getSetting('apiKey') || DEFAULT_API_KEY; const API_URL = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`; try { const response = await fetch(API_URL); if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); const data = await response.json(); const chatModels = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => ({ id: m.name.split('/')[1], name: m.displayName })); localStorage.setItem('cachedModels', JSON.stringify(chatModels)); populateModelDropdown(chatModels); if (isManualRefresh) alert('Model list updated successfully!'); } catch (error) { console.error("Failed to fetch models:", error); updateStatus('error', 'Model fetch failed'); if (isManualRefresh) alert(`Could not refresh models. Error: ${error.message}`); } finally { refreshModelsBtn.disabled = false; refreshModelsBtn.textContent = 'Refresh Model List'; } }
+            function populateModelDropdown(models) { const savedModel = localStorage.getItem('selectedModel'); const PREFERRED_DEFAULT_MODEL = 'gemini-1.5-flash-latest'; modelSelect.innerHTML = ''; if (!models || models.length === 0) { modelSelect.innerHTML = '<option>No models found</option>'; updateStatus('error', 'No models found'); return; } models.forEach(model => { const option = document.createElement('option'); option.value = model.id; option.textContent = model.name; modelSelect.appendChild(option); }); if (savedModel && models.some(m => m.id === savedModel)) { modelSelect.value = savedModel; } else if (models.some(m => m.id === PREFERRED_DEFAULT_MODEL)) { modelSelect.value = PREFERRED_DEFAULT_MODEL; } else if (models.length > 0) { modelSelect.value = models[0].id; } localStorage.setItem('selectedModel', modelSelect.value); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); }
             mainSettingsBtn.addEventListener('click', () => settingsModal.classList.add('active'));
-            closeSettingsBtn.addEventListener('click', () => { saveAllSettings(); loadAllSettings(); settingsModal.classList.remove('active'); });
+            closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('active'));
             refreshModelsBtn.addEventListener('click', () => fetchModels(true));
             modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); });
-            
-            newChatBtn.addEventListener('click', () => {
-                chatHistory = [];
-                localStorage.removeItem('chatHistory');
-                chatWindow.innerHTML = '';
-                addMessage("Hello! How can I help you today?", 'ai');
-                updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
-            });
-
+            newChatBtn.addEventListener('click', () => { chatHistory = []; localStorage.removeItem('chatHistory'); chatWindow.innerHTML = ''; addMessage("Hello! How can I help you today?", 'ai'); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); });
             messageInput.addEventListener('input', () => { messageInput.style.height = 'auto'; messageInput.style.height = (messageInput.scrollHeight) + 'px'; });
             messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && currentModelSettings.isSendOnEnter) { e.preventDefault(); chatForm.requestSubmit(); } });
             topInputBar.addEventListener('click', (e) => { if (e.target.classList.contains('quick-prompt-btn')) { const promptText = e.target.textContent; messageInput.value += (messageInput.value.trim() ? ' ' : '') + promptText + ' '; messageInput.focus(); messageInput.dispatchEvent(new Event('input', { bubbles: true })); } });
-            
-            scrollToTopBtn.addEventListener('click', () => {
-                chatWindow.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-            scrollToBottomBtn.addEventListener('click', () => {
-                chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
-            });
+            scrollToTopBtn.addEventListener('click', () => chatWindow.scrollTo({ top: 0, behavior: 'smooth' }));
+            scrollToBottomBtn.addEventListener('click', () => chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' }));
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && settingsModal.classList.contains('active')) { settingsModal.classList.remove('active'); } });
 
             chatForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                if (abortController) { abortController.abort(); return; }
                 const userInput = messageInput.value.trim();
                 if (!userInput) return;
-                
                 addMessage(userInput, 'user');
-                if (currentModelSettings.isSaveHistory) {
-                    chatHistory.push({ role: 'user', parts: [{ text: userInput }] });
-                }
-                
-                messageInput.value = '';
-                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                messageInput.focus();
-                
+                if (currentModelSettings.isSaveHistory) { chatHistory.push({ role: 'user', parts: [{ text: userInput }] }); }
+                messageInput.value = ''; messageInput.dispatchEvent(new Event('input', { bubbles: true })); messageInput.focus();
                 const aiMessageElement = addMessage('', 'ai');
                 await handleApiCall(userInput, aiMessageElement);
             });
 
-            // ✅ NEW: Event delegation for retry button
             chatWindow.addEventListener('click', async (e) => {
-                if (e.target.classList.contains('retry-btn')) {
-                    const aiMessageElement = e.target.closest('.message.ai');
+                const target = e.target.closest('button');
+                if (!target) return;
+                
+                // ✅ CORRECTED: Copy Button Logic
+                if (target.classList.contains('copy-btn')) {
+                    const contentEl = target.previousElementSibling; // Find the sibling .content div
+                    if (!contentEl) return;
+                    
+                    const textToCopy = contentEl.innerText;
+                    if (!navigator.clipboard) {
+                        console.error("Clipboard API not available. This might be due to an insecure context (not HTTPS).");
+                        return;
+                    }
+                    try {
+                        await navigator.clipboard.writeText(textToCopy);
+                        target.innerHTML = '✓';
+                        target.classList.add('copied');
+                        setTimeout(() => {
+                            target.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+                            target.classList.remove('copied');
+                        }, 1500);
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                    }
+                } 
+                // Retry Button Logic
+                else if (target.classList.contains('retry-btn')) {
+                    const aiMessageElement = target.closest('.message.ai');
                     const failedPrompt = aiMessageElement.dataset.failedPrompt;
-
                     if (aiMessageElement && failedPrompt) {
                         const contentEl = aiMessageElement.querySelector('.content');
-                        contentEl.innerHTML = ''; // Clear the error message
-                        await handleApiCall(failedPrompt, aiMessageElement, false); // Retry without adding to history again
+                        contentEl.innerHTML = '';
+                        await handleApiCall(failedPrompt, aiMessageElement, false);
                     }
                 }
             });
 
-            // ✅ NEW: Centralized function to handle the API call and its UI
             async function handleApiCall(prompt, aiMessageElement, addToHistory = true) {
                 const thinkingElement = showTypingIndicator(aiMessageElement);
-                updateStatus('sending');
-                
-                // If this is a new message, add to history. If it's a retry, we don't.
-                if (addToHistory && currentModelSettings.isSaveHistory && !chatHistory.some(m => m.parts[0].text === prompt)) {
-                     // The logic to add user message to history is now moved here, but we already did it in the submit handler.
-                     // The submit handler is the only one that sets addToHistory to true.
-                     // So we can remove the history push from the submit handler and put it here.
-                     // Let's refactor that.
-                }
-
+                updateStatus('generating');
                 try {
                     await callGeminiAPI(prompt, aiMessageElement);
                 } catch (error) {
-                    console.error("API Call Failed:", error);
-                    updateStatus('error', 'Response failed');
-                    
-                    // Store the failed prompt on the element for retry
-                    aiMessageElement.dataset.failedPrompt = prompt;
-
-                    const contentEl = aiMessageElement.querySelector('.content');
-                    contentEl.innerHTML = `
-                        <div class="error-container">
-                            <p>Failed to get response.</p>
-                            <button class="retry-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5A10 10 0 0 1 12 2a10 10 0 0 1 10 10"/><path d="M22 12.5a10 10 0 0 1-10 10 10 10 0 0 1-10-10"/></svg>
-                                Retry
-                            </button>
-                        </div>
-                    `;
+                    if (error.name === 'AbortError') {
+                        console.log('API call aborted by user.');
+                        const contentEl = aiMessageElement.querySelector('.content');
+                        if (!contentEl.innerText.trim()) { contentEl.innerHTML = `<p style="color:var(--text-secondary-color);">Generation stopped.</p>`; }
+                        updateStatus('stopped');
+                    } else {
+                        console.error("API Call Failed:", error);
+                        updateStatus('error', 'Response failed');
+                        aiMessageElement.dataset.failedPrompt = prompt;
+                        const contentEl = aiMessageElement.querySelector('.content');
+                        contentEl.innerHTML = `<div class="error-container"><p>Failed to get response.</p><button class="retry-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5A10 10 0 0 1 12 2a10 10 0 0 1 10 10"/><path d="M22 12.5a10 10 0 0 1-10 10 10 10 0 0 1-10-10"/></svg>Retry</button></div>`;
+                    }
                 } finally {
                     thinkingElement?.remove();
+                    abortController = null;
+                    if (connectionStatus.innerText.includes('Generating')) {
+                        updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
+                    }
                 }
             }
 
-
             async function callGeminiAPI(prompt, aiMessageElement) {
-                const apiKey = currentModelSettings.apiKey || DEFAULT_API_KEY;
+                abortController = new AbortController();
+                const apiKey = getSetting('apiKey') || DEFAULT_API_KEY;
                 const model = modelSelect.value;
                 if (!model || model === 'No models found') { throw new Error("No model selected."); }
                 
-                // Construct the history for this call. This is important for context.
-                // The history should not include the current prompt.
-                const historyForApi = chatHistory.filter(m => !(m.role === 'user' && m.parts[0].text === prompt));
-
-                const requestBody = {
-                    contents: [...historyForApi, { role: 'user', parts: [{ text: prompt }] }],
-                    systemInstruction: currentModelSettings.systemPrompt ? { role: "model", parts: [{ text: currentModelSettings.systemPrompt }] } : undefined,
-                };
-
+                const historyForApi = chatHistory.slice(0, -1);
+                const requestBody = { contents: [...historyForApi, { role: 'user', parts: [{ text: prompt }] }], systemInstruction: currentModelSettings.systemPrompt ? { role: "model", parts: [{ text: currentModelSettings.systemPrompt }] } : undefined, };
                 const isStreaming = currentModelSettings.isStreaming;
                 const streamParam = isStreaming ? ':streamGenerateContent?alt=sse' : ':generateContent';
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}${streamParam}&key=${apiKey}`;
                 
-                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
+                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal: abortController.signal });
                 if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`); }
-                
-                updateStatus('generating');
                 
                 aiMessageElement.querySelector('.typing-indicator')?.remove();
                 const contentEl = aiMessageElement.querySelector('.content');
-                contentEl.innerHTML = ''; // Clear any previous content (like retry button)
+                contentEl.innerHTML = '';
                 
                 let fullText = '';
-                if (isStreaming) {
-                    fullText = await processStream(response, contentEl);
-                } else {
-                    const data = await response.json();
-                    fullText = data.candidates[0].content.parts[0].text;
-                    renderContent(fullText, contentEl);
+                if (isStreaming) { fullText = await processStream(response, contentEl); } else {
+                    const data = await response.json(); fullText = data.candidates[0].content.parts[0].text; renderContent(fullText, contentEl);
                 }
-
-                // Add AI response to history
-                if (currentModelSettings.isSaveHistory) {
-                    chatHistory.push({ role: 'model', parts: [{ text: fullText }] });
-                }
-
+                
+                if (currentModelSettings.isSaveHistory) { chatHistory.push({ role: 'model', parts: [{ text: fullText }] }); }
                 postProcessContent(contentEl);
-                updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text);
             }
+
             async function processStream(response, contentEl) {
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let fullText = ''; let buffer = '';
                 while (true) {
+                    if (abortController.signal.aborted) { reader.cancel(); throw new DOMException('Aborted by user', 'AbortError'); }
                     const { done, value } = await reader.read();
                     if (done) break;
                     buffer += decoder.decode(value, { stream: true });
@@ -521,61 +353,42 @@
                 }
                 return fullText;
             }
-            function addMessage(text, role) { const messageDiv = document.createElement('div'); messageDiv.className = `message ${role}`; const contentDiv = document.createElement('div'); contentDiv.className = 'content'; if (role !== 'ai') contentDiv.textContent = text; messageDiv.appendChild(contentDiv); chatWindow.appendChild(messageDiv); scrollToBottom(); return messageDiv; }
-            function showTypingIndicator(aiMessageElement) {
-                const contentEl = aiMessageElement.querySelector('.content');
-                if (contentEl) {
-                    contentEl.innerHTML = ''; // Clear previous content before showing indicator
-                    const indicator = document.createElement('div');
-                    indicator.className = 'typing-indicator';
-                    indicator.innerHTML = `<span></span><span></span><span></span>`;
-                    contentEl.appendChild(indicator);
-                    return indicator;
-                }
-                return null;
-            }
-            function renderContent(text, element) {
-                if (currentModelSettings.isMarkdown) {
-                    element.innerHTML = marked.parse(text);
+
+            // ✅ CORRECTED: addMessage function
+            function addMessage(text, role) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${role}`;
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'content';
+                
+                if (role !== 'ai') { 
+                    contentDiv.textContent = text;
+                    messageDiv.appendChild(contentDiv);
                 } else {
-                    element.textContent = text;
+                    // For AI messages, add content div first, then the copy button as a sibling.
+                    messageDiv.appendChild(contentDiv);
+                    
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-btn';
+                    copyButton.title = 'Copy';
+                    copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+                    messageDiv.appendChild(copyButton);
                 }
+                
+                chatWindow.appendChild(messageDiv);
+                scrollToBottom();
+                return messageDiv;
             }
-            function postProcessContent(element) {
-                if (!currentModelSettings.isMarkdown) return;
-                const tables = element.querySelectorAll('table');
-                tables.forEach(table => {
-                    if (table.parentNode.className !== 'table-wrapper') {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'table-wrapper';
-                        table.parentNode.insertBefore(wrapper, table);
-                        wrapper.appendChild(table);
-                    }
-                });
-            }
+
+            function showTypingIndicator(aiMessageElement) { const contentEl = aiMessageElement.querySelector('.content'); if (contentEl) { contentEl.innerHTML = ''; const indicator = document.createElement('div'); indicator.className = 'typing-indicator'; indicator.innerHTML = `<span></span><span></span><span></span>`; contentEl.appendChild(indicator); return indicator; } return null; }
+            function renderContent(text, element) { if (currentModelSettings.isMarkdown) { element.innerHTML = marked.parse(text); } else { element.textContent = text; } }
+            function postProcessContent(element) { if (!currentModelSettings.isMarkdown) return; const tables = element.querySelectorAll('table'); tables.forEach(table => { if (table.parentNode.className !== 'table-wrapper') { const wrapper = document.createElement('div'); wrapper.className = 'table-wrapper'; table.parentNode.insertBefore(wrapper, table); wrapper.appendChild(table); } }); }
             function scrollToBottom() { chatWindow.scrollTop = chatWindow.scrollHeight; }
-            function loadChatHistory() {
-                if (!getSetting('isSaveHistory')) {
-                    localStorage.removeItem('chatHistory');
-                    addMessage("Hello! How can I help you today?", 'ai');
-                    return;
-                }
-                const savedHistory = localStorage.getItem('chatHistory');
-                if (savedHistory) {
-                    chatHistory = JSON.parse(savedHistory);
-                    chatWindow.innerHTML = '';
-                    chatHistory.forEach(msg => {
-                        const messageElement = addMessage('', msg.role);
-                        const contentEl = messageElement.querySelector('.content');
-                        renderContent(msg.parts[0].text, contentEl);
-                        postProcessContent(contentEl);
-                    });
-                } else {
-                    addMessage("Hello! How can I help you today?", 'ai');
-                }
-            }
+            function loadChatHistory() { if (!getSetting('isSaveHistory')) { localStorage.removeItem('chatHistory'); addMessage("Hello! How can I help you today?", 'ai'); return; } const savedHistory = localStorage.getItem('chatHistory'); if (savedHistory) { chatHistory = JSON.parse(savedHistory); chatWindow.innerHTML = ''; chatHistory.forEach(msg => { const messageElement = addMessage(msg.parts[0].text, msg.role); if (msg.role === 'ai') { postProcessContent(messageElement.querySelector('.content')); } }); } else { addMessage("Hello! How can I help you today?", 'ai'); } }
             function saveChatHistory() { if (getSetting('isSaveHistory')) { localStorage.setItem('chatHistory', JSON.stringify(chatHistory)); } }
+            
             async function initializeApp() {
+                setSendButtonState('send');
                 loadAllSettings();
                 const cachedModels = localStorage.getItem('cachedModels');
                 if (cachedModels) { populateModelDropdown(JSON.parse(cachedModels)); } else { await fetchModels(); }
