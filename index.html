@@ -208,4 +208,95 @@
                 'isStreaming': { el: streamingToggle, type: 'checked', default: true },
                 'isMarkdown': { el: markdownToggle, type: 'checked', default: true },
                 'isSendOnEnter': { el: sendOnEnterToggle, type: 'checked', default: false },
-          
+                'isSaveHistory': { el: saveHistoryToggle, type: 'checked', default: true },
+            };
+
+            function getSetting(key) { const storedValue = localStorage.getItem(`settings_global_${key}`); return storedValue !== null ? JSON.parse(storedValue) : settingsConfig[key].default; }
+            function saveSetting(key, value) { localStorage.setItem(`settings_global_${key}`, JSON.stringify(value)); }
+            
+            function loadAllSettings() {
+                for (const key in settingsConfig) {
+                    const value = getSetting(key);
+                    currentModelSettings[key] = value;
+                    const config = settingsConfig[key];
+                    if (config.el) {
+                        config.el[config.type] = value;
+                        if (key === 'temperature') {
+                            temperatureValueDisplay.textContent = parseFloat(value).toFixed(1);
+                        }
+                    }
+                }
+            }
+            function saveAllSettings() { for (const key in settingsConfig) { const config = settingsConfig[key]; if (config.el) { saveSetting(key, config.el[config.type]); currentModelSettings[key] = config.el[config.type]; } } }
+            
+            async function fetchModels(isManualRefresh = false) { refreshModelsBtn.disabled = true; refreshModelsBtn.textContent = 'Refreshing...'; const apiKey = getSetting('apiKey') || DEFAULT_API_KEY; const API_URL = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`; try { const response = await fetch(API_URL); if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); const data = await response.json(); const chatModels = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => ({ id: m.name.split('/')[1], name: m.displayName })); localStorage.setItem('cachedModels', JSON.stringify(chatModels)); populateModelDropdown(chatModels); if (isManualRefresh) alert('Model list updated successfully!'); } catch (error) { console.error("Failed to fetch models:", error); updateStatus('error', 'Model fetch failed'); if (isManualRefresh) alert(`Could not refresh models. Error: ${error.message}`); } finally { refreshModelsBtn.disabled = false; refreshModelsBtn.textContent = 'Refresh Model List'; } }
+            
+            function populateModelDropdown(models) { const savedModel = localStorage.getItem('selectedModel'); const PREFERRED_DEFAULT_MODEL = 'gemini-2.0-flash'; modelSelect.innerHTML = ''; if (!models || models.length === 0) { modelSelect.innerHTML = '<option>No models found</option>'; updateStatus('error', 'No models found'); return; } models.forEach(model => { const option = document.createElement('option'); option.value = model.id; option.textContent = model.name; modelSelect.appendChild(option); }); if (savedModel && models.some(m => m.id === savedModel)) { modelSelect.value = savedModel; } else if (models.some(m => m.id === PREFERRED_DEFAULT_MODEL)) { modelSelect.value = PREFERRED_DEFAULT_MODEL; } else if (models.length > 0) { modelSelect.value = models[0].id; } localStorage.setItem('selectedModel', modelSelect.value); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); }
+            
+            newChatBtn.addEventListener('click', startNewConversation);
+            mainSettingsBtn.addEventListener('click', () => settingsModal.classList.add('active'));
+            closeSettingsBtn.addEventListener('click', () => { settingsModal.classList.remove('active'); saveAllSettings(); });
+            refreshModelsBtn.addEventListener('click', () => fetchModels(true));
+            modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); });
+            messageInput.addEventListener('input', () => { messageInput.style.height = 'auto'; messageInput.style.height = (messageInput.scrollHeight) + 'px'; });
+            messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && getSetting('isSendOnEnter')) { e.preventDefault(); chatForm.requestSubmit(); } });
+            document.querySelector('#top-input-bar').addEventListener('click', (e) => { if (e.target.classList.contains('quick-prompt-btn')) { const promptText = e.target.textContent; messageInput.value += (messageInput.value.trim() ? ' ' : '') + promptText + ' '; messageInput.focus(); messageInput.dispatchEvent(new Event('input', { bubbles: true })); } });
+            scrollToTopBtn.addEventListener('click', () => chatWindow.scrollTo({ top: 0, behavior: 'smooth' }));
+            scrollToBottomBtn.addEventListener('click', () => chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' }));
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && settingsModal.classList.contains('active')) { closeSettingsBtn.click(); } });
+            temperatureSlider.addEventListener('input', () => { temperatureValueDisplay.textContent = parseFloat(temperatureSlider.value).toFixed(1); });
+
+            chatForm.addEventListener('submit', async (e) => { e.preventDefault(); if (abortController) { abortController.abort(); return; } const userInput = messageInput.value.trim(); if (!userInput) return; addMessage(userInput, 'user'); if (getSetting('isSaveHistory')) { chatHistory.push({ role: 'user', parts: [{ text: userInput }] }); } messageInput.value = ''; messageInput.dispatchEvent(new Event('input', { bubbles: true })); messageInput.focus(); const aiMessageElement = addMessage('', 'ai'); await handleApiCall(userInput, aiMessageElement); });
+            chatWindow.addEventListener('click', async (e) => { const target = e.target.closest('button'); if (!target) return; if (target.classList.contains('copy-btn')) { const contentEl = target.previousElementSibling; if (!contentEl) return; try { await navigator.clipboard.writeText(contentEl.innerText); target.innerHTML = '✓'; target.classList.add('copied'); setTimeout(() => { target.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`; target.classList.remove('copied'); }, 1500); } catch (err) { console.error('Failed to copy text: ', err); } } else if (target.classList.contains('retry-btn')) { const aiMessageElement = target.closest('.message.ai'); const failedPrompt = aiMessageElement.dataset.failedPrompt; if (aiMessageElement && failedPrompt) { aiMessageElement.querySelector('.content').innerHTML = ''; await handleApiCall(failedPrompt, aiMessageElement, false); } } });
+            
+            async function handleApiCall(prompt, aiMessageElement, addToHistory = true) { const thinkingElement = showTypingIndicator(aiMessageElement); updateStatus('generating'); try { await callGeminiAPI(prompt, aiMessageElement); } catch (error) { if (error.name === 'AbortError') { console.log('API call aborted by user.'); const contentEl = aiMessageElement.querySelector('.content'); if (!contentEl.innerText.trim()) { contentEl.innerHTML = `<p style="color:var(--text-secondary-color);">Generation stopped.</p>`; } updateStatus('stopped'); } else { console.error("API Call Failed:", error); const errorMessage = error.message || "An unknown error occurred."; updateStatus('error', 'Response failed'); aiMessageElement.dataset.failedPrompt = prompt; const contentEl = aiMessageElement.querySelector('.content'); contentEl.innerHTML = `<div class="error-container"><p><strong>Error:</strong> ${errorMessage}</p><button class="retry-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5A10 10 0 0 1 12 2a10 10 0 0 1 10 10"/><path d="M22 12.5a10 10 0 0 1-10 10 10 10 0 0 1-10-10"/></svg>Retry</button></div>`; } } finally { thinkingElement?.remove(); abortController = null; if (connectionStatus.innerText.includes('Generating')) { updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); } } }
+            
+            async function callGeminiAPI(prompt, aiMessageElement) {
+                abortController = new AbortController();
+                const apiKey = getSetting('apiKey') || DEFAULT_API_KEY;
+                const model = modelSelect.value;
+                if (!model || model === 'No models found') { throw new Error("No model selected."); }
+                
+                const historyForApi = chatHistory.slice(0, -1);
+                const requestBody = {
+                    contents: [...historyForApi, { role: 'user', parts: [{ text: prompt }] }],
+                    systemInstruction: getSetting('systemPrompt') ? { role: "model", parts: [{ text: getSetting('systemPrompt') }] } : undefined,
+                    generationConfig: { temperature: parseFloat(getSetting('temperature')) }
+                };
+
+                const isStreaming = getSetting('isStreaming');
+                const streamParam = isStreaming ? ':streamGenerateContent?alt=sse' : ':generateContent';
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}${streamParam}&key=${apiKey}`;
+                
+                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal: abortController.signal });
+                if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`); }
+                
+                aiMessageElement.querySelector('.typing-indicator')?.remove();
+                const contentEl = aiMessageElement.querySelector('.content');
+                contentEl.innerHTML = '';
+                
+                let fullText = '';
+                if (isStreaming) { fullText = await processStream(response, contentEl); } else {
+                    const data = await response.json(); fullText = data.candidates[0].content.parts[0].text; renderContent(fullText, contentEl);
+                }
+                
+                if (getSetting('isSaveHistory')) { chatHistory.push({ role: 'model', parts: [{ text: fullText }] }); }
+                postProcessContent(contentEl);
+            }
+
+            async function processStream(response, contentEl) { const reader = response.body.getReader(); const decoder = new TextDecoder(); let fullText = ''; let buffer = ''; while (true) { if (abortController.signal.aborted) { reader.cancel(); throw new DOMException('Aborted by user', 'AbortError'); } const { done, value } = await reader.read(); if (done) break; buffer += decoder.decode(value, { stream: true }); const lines = buffer.split('\n'); buffer = lines.pop(); for (const line of lines) { if (line.startsWith('data: ')) { try { const json = JSON.parse(line.substring(6)); if (json.candidates && json.candidates[0].content.parts[0].text) { const chunk = json.candidates[0].content.parts[0].text; fullText += chunk; renderContent(fullText, contentEl, true); } } catch (e) { console.warn("Could not parse stream chunk:", line); } } } } return fullText; }
+            function addMessage(text, role) { const messageDiv = document.createElement('div'); messageDiv.className = `message ${role}`; const contentDiv = document.createElement('div'); contentDiv.className = 'content'; if (role !== 'ai') { contentDiv.textContent = text; messageDiv.appendChild(contentDiv); } else { messageDiv.appendChild(contentDiv); const copyButton = document.createElement('button'); copyButton.className = 'copy-btn'; copyButton.title = 'Copy'; copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`; messageDiv.appendChild(copyButton); } chatWindow.appendChild(messageDiv); scrollToBottom(); return messageDiv; }
+            function showTypingIndicator(aiMessageElement) { const contentEl = aiMessageElement.querySelector('.content'); if (contentEl) { contentEl.innerHTML = ''; return document.createElement('div'); } return null; }
+            function renderContent(text, element, isStreaming = false) { if (getSetting('isMarkdown') && window.marked) { element.innerHTML = marked.parse(text); } else { element.textContent = text; } if (!isStreaming) { postProcessContent(element); } }
+            function postProcessContent(element) { if (!getSetting('isMarkdown')) return; const tables = element.querySelectorAll('table'); tables.forEach(table => { if (table.parentNode.className !== 'table-wrapper') { const wrapper = document.createElement('div'); wrapper.className = 'table-wrapper'; table.parentNode.insertBefore(wrapper, table); wrapper.appendChild(table); } }); }
+            function scrollToBottom() { chatWindow.scrollTop = chatWindow.scrollHeight; }
+            function loadChatHistory() { if (!getSetting('isSaveHistory')) { localStorage.removeItem('chatHistory'); chatHistory = []; return false; } const savedHistory = localStorage.getItem('chatHistory'); if (savedHistory && JSON.parse(savedHistory).length > 0) { chatHistory = JSON.parse(savedHistory); chatWindow.innerHTML = ''; chatHistory.forEach(msg => { const messageElement = addMessage(msg.parts[0].text, msg.role); if (msg.role === 'ai') { postProcessContent(messageElement.querySelector('.content')); } }); return true; } chatHistory = []; return false; }
+            function saveChatHistory() { if (getSetting('isSaveHistory')) { localStorage.setItem('chatHistory', JSON.stringify(chatHistory)); } }
+            function startNewConversation() { chatHistory = []; localStorage.removeItem('chatHistory'); chatWindow.innerHTML = ''; const initialPrompt = "hello"; addMessage(initialPrompt, 'user'); if (getSetting('isSaveHistory')) { chatHistory.push({ role: 'user', parts: [{ text: initialPrompt }] }); } const aiMessageElement = addMessage('', 'ai'); handleApiCall(initialPrompt, aiMessageElement); }
+            async function initializeApp() { setSendButtonState('send'); loadAllSettings(); const cachedModels = localStorage.getItem('cachedModels'); if (cachedModels) { populateModelDropdown(JSON.parse(cachedModels)); } else { await fetchModels(); } const historyWasLoaded = loadChatHistory(); if (!historyWasLoaded) { startNewConversation(); } window.addEventListener('beforeunload', saveChatHistory); messageInput.focus(); }
+            initializeApp();
+        });
+    </script>
+    <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then(registration => { console.log('SW registered: ', registration.scope); }, err => { console.log('SW registration failed: ', err); }); }); }</script>
+</body>
+</html>
