@@ -110,9 +110,34 @@
 
         #chat-form { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid var(--bg-color); background-color: var(--surface-color); flex-shrink: 0; gap: 8px; }
         #top-input-bar { display: flex; align-items: center; gap: 8px; }
-        .quick-prompt-btn { background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; }
+        .quick-prompt-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary-color);
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            min-width: 65px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-        #main-model-select { margin-left: auto; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 16px; font-size: 0.85rem; background-color: var(--bg-color); max-width: 120px; flex-shrink: 0; height: 32px; }
+        #main-model-select {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-left: auto;
+            padding: 4px 10px; /* MODIFIED */
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            font-size: 0.8rem;
+            background-color: var(--bg-color);
+            max-width: 120px; /* MODIFIED */
+            flex-shrink: 0;
+            /* height property removed */
+        }
         .icon-btn { background: none; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary-color); flex-shrink: 0; padding: 0; }
 
         .input-row { display: flex; align-items: flex-end; width: 100%; gap: 8px; }
@@ -176,6 +201,7 @@
         .modal-footer { padding: 16px; text-align: center; font-size: 0.8rem; color: var(--text-secondary-color); border-top: 1px solid var(--border-color); background-color: var(--surface-color); }
         .slider-container { display: flex; align-items: center; gap: 12px; width: 100%; }
         .slider-container input[type="range"] { flex-grow: 1; }
+        .setting-disabled { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -207,7 +233,20 @@
         </main>
         <button id="show-bars-btn" type="button" aria-label="Show Bars" title="Show Bars"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
     </div>
-    <div id="settings-modal" class="modal"><div class="modal-content"><header class="modal-header"><h2>Settings</h2><button id="close-settings-btn" class="close-btn" aria-label="Close Settings">×</button></header><div class="modal-body"><div class="settings-group"><h3>API & Model</h3><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="api-key-input">Gemini API Key</label><small>Overrides the default key. Stored locally.</small><input type="password" id="api-key-input" class="setting-input" placeholder="Enter your key"></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="system-prompt-input">System Prompt</label><small>Defines the AI's default behavior.</small><textarea id="system-prompt-input" class="setting-input" rows="3" placeholder="Leave empty for default behavior..."></textarea></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="temperature-slider">Temperature</label><small>Controls randomness. Lower is more predictable.</small><div class="slider-container"><input type="range" id="temperature-slider" min="0" max="1" step="0.1" class="setting-input" style="margin-top:0;"><span id="temperature-value-display" style="min-width: 2.5em; text-align: right;">1.0</span></div></div><div class="refresh-btn-container"><button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button></div></div><div class="settings-group"><h3>Chat Behavior</h3><div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="auto-hide-on-send-toggle">Auto-hide on Send</label><label class="switch"><input type="checkbox" id="auto-hide-on-send-toggle"><span class="slider"></span></label></div>
+    <div id="settings-modal" class="modal"><div class="modal-content"><header class="modal-header"><h2>Settings</h2><button id="close-settings-btn" class="close-btn" aria-label="Close Settings">×</button></header><div class="modal-body"><div class="settings-group"><h3>API & Model</h3><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="api-key-input">Gemini API Key</label><small>Overrides the default key. Stored locally.</small><input type="password" id="api-key-input" class="setting-input" placeholder="Enter your key"></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="system-prompt-input">System Prompt</label><small>Defines the AI's default behavior.</small><textarea id="system-prompt-input" class="setting-input" rows="3" placeholder="Leave empty for default behavior..."></textarea></div>
+                    <div class="setting-item">
+                        <label for="temperature-toggle">Use Temperature</label>
+                        <label class="switch">
+                            <input type="checkbox" id="temperature-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="temperature-slider-container" class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                        <label for="temperature-slider">Temperature</label><small>Controls randomness. Lower is more predictable.</small>
+                        <div class="slider-container"><input type="range" id="temperature-slider" min="0" max="1" step="0.1" class="setting-input" style="margin-top:0;">
+                        <span id="temperature-value-display" style="min-width: 2.5em; text-align: right;">1.0</span></div>
+                    </div>
+                    <div class="refresh-btn-container"><button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button></div></div><div class="settings-group"><h3>Chat Behavior</h3><div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="auto-hide-on-send-toggle">Auto-hide on Send</label><label class="switch"><input type="checkbox" id="auto-hide-on-send-toggle"><span class="slider"></span></label></div>
                     <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
                         <label>Quick Prompts</label>
                         <small>Set the text for the shortcut buttons.</small>
@@ -249,6 +288,8 @@
             const statusBar = document.getElementById('status-bar');
             const quickPrompt1Input = document.getElementById('quick-prompt-1-input');
             const quickPrompt2Input = document.getElementById('quick-prompt-2-input');
+            const temperatureToggle = document.getElementById('temperature-toggle');
+            const temperatureSliderContainer = document.getElementById('temperature-slider-container');
 
             const DEFAULT_API_KEY = "AIzaSyDnKMIXmkQLSteQbFfS6mmsUJACZQm4bJo";
             let chatHistory = [];
@@ -258,7 +299,6 @@
             const sendIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
             const stopIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>`;
 
-            // NEW: Debounce utility function
             function debounce(func, delay) {
                 let timeoutId;
                 return function(...args) {
@@ -275,6 +315,7 @@
             const settingsConfig = {
                 'apiKey': { el: apiKeyInput, type: 'value', default: '' },
                 'systemPrompt': { el: systemPromptInput, type: 'value', default: '' },
+                'isTemperatureEnabled': { el: temperatureToggle, type: 'checked', default: true },
                 'temperature': { el: temperatureSlider, type: 'value', default: 1 },
                 'isStreaming': { el: streamingToggle, type: 'checked', default: true },
                 'isMarkdown': { el: markdownToggle, type: 'checked', default: true },
@@ -303,9 +344,26 @@
             }
             function saveAllSettings() { for (const key in settingsConfig) { const config = settingsConfig[key]; if (config.el) { saveSetting(key, config.el[config.type]); currentModelSettings[key] = config.el[config.type]; } } }
 
+            function truncatePrompt(text) {
+                if (!text) return '';
+                const words = text.trim().split(' ');
+                if (words.length > 1) {
+                    return `${words[0]}...`;
+                }
+                return text;
+            }
+
             function updateQuickPromptButtons() {
-                document.getElementById('quick-prompt-btn-1').textContent = getSetting('quickPrompt1');
-                document.getElementById('quick-prompt-btn-2').textContent = getSetting('quickPrompt2');
+                document.getElementById('quick-prompt-btn-1').textContent = truncatePrompt(getSetting('quickPrompt1'));
+                document.getElementById('quick-prompt-btn-2').textContent = truncatePrompt(getSetting('quickPrompt2'));
+            }
+
+            function updateTemperatureControlState() {
+                if (temperatureToggle.checked) {
+                    temperatureSliderContainer.classList.remove('setting-disabled');
+                } else {
+                    temperatureSliderContainer.classList.add('setting-disabled');
+                }
             }
 
             async function fetchModels(isManualRefresh = false) { refreshModelsBtn.disabled = true; refreshModelsBtn.textContent = 'Refreshing...'; const apiKey = getSetting('apiKey') || DEFAULT_API_KEY; const API_URL = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`; try { const response = await fetch(API_URL); if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); const data = await response.json(); const chatModels = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => ({ id: m.name.split('/')[1], name: m.displayName })); localStorage.setItem('cachedModels', JSON.stringify(chatModels)); populateModelDropdown(chatModels); if (isManualRefresh) alert('Model list updated successfully!'); } catch (error) { console.error("Failed to fetch models:", error); updateStatus('error', 'Model fetch failed'); if (isManualRefresh) alert(`Could not refresh models. Error: ${error.message}`); } finally { refreshModelsBtn.disabled = false; refreshModelsBtn.textContent = 'Refresh Model List'; } }
@@ -342,14 +400,20 @@
 
             document.querySelector('#top-input-bar').addEventListener('click', (e) => {
                 if (e.target.classList.contains('quick-prompt-btn')) {
-                    const buttonText = e.target.textContent;
-                    if (buttonText.toLowerCase() === 'input') {
+                    const buttonId = e.target.id;
+                    let fullPromptText = '';
+                    if (buttonId === 'quick-prompt-btn-1') {
+                        fullPromptText = getSetting('quickPrompt1');
+                    } else if (buttonId === 'quick-prompt-btn-2') {
+                        fullPromptText = getSetting('quickPrompt2');
+                    } else if (e.target.textContent.toLowerCase() === 'input') {
                         messageInput.focus();
-                    } else {
-                        messageInput.value += (messageInput.value.trim() ? ' ' : '') + buttonText + ' ';
-                        messageInput.focus();
-                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        return;
                     }
+                    
+                    messageInput.value += (messageInput.value.trim() ? ' ' : '') + fullPromptText + ' ';
+                    messageInput.focus();
+                    messageInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             });
             
@@ -357,15 +421,14 @@
             scrollToBottomBtn.addEventListener('click', () => chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' }));
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && settingsModal.classList.contains('active')) { closeSettingsBtn.click(); } });
             
-            // MODIFIED: Event listener for the temperature slider to use debounce.
             const debouncedSaveTemperature = debounce((value) => saveSetting('temperature', value), 400);
 
             temperatureSlider.addEventListener('input', () => {
-                // Update the visual display instantly for good user feedback.
                 temperatureValueDisplay.textContent = parseFloat(temperatureSlider.value).toFixed(1);
-                // Call the debounced function to save the setting efficiently.
                 debouncedSaveTemperature(temperatureSlider.value);
             });
+
+            temperatureToggle.addEventListener('change', updateTemperatureControlState);
 
 
             chatForm.addEventListener('submit', async (e) => {
@@ -403,11 +466,16 @@
                 const model = modelSelect.value;
                 if (!model || model === 'No models found') { throw new Error("No model selected."); }
 
+                const generationConfig = {};
+                if (getSetting('isTemperatureEnabled')) {
+                    generationConfig.temperature = parseFloat(getSetting('temperature'));
+                }
+
                 const historyForApi = chatHistory.slice(0, -1);
                 const requestBody = {
                     contents: [...historyForApi, { role: 'user', parts: [{ text: prompt }] }],
                     systemInstruction: getSetting('systemPrompt') ? { role: "model", parts: [{ text: getSetting('systemPrompt') }] } : undefined,
-                    generationConfig: { temperature: parseFloat(getSetting('temperature')) }
+                    generationConfig: Object.keys(generationConfig).length > 0 ? generationConfig : undefined
                 };
 
                 const isStreaming = getSetting('isStreaming');
@@ -443,6 +511,7 @@
                 setSendButtonState('send'); 
                 loadAllSettings();
                 updateQuickPromptButtons();
+                updateTemperatureControlState();
                 const cachedModels = localStorage.getItem('cachedModels'); 
                 if (cachedModels) { 
                     populateModelDropdown(JSON.parse(cachedModels)); 
