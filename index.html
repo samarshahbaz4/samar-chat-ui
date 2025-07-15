@@ -43,13 +43,14 @@
             max-width: 800px; margin: 0 auto;
             background-color: var(--surface-color);
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative; /* Added for positioning show-bars-btn */
         }
         #chat-window {
             flex-grow: 1;
             overflow-y: auto;
             padding: 16px;
             border-top: 1px solid var(--border-color);
-            scroll-behavior: smooth; 
+            scroll-behavior: smooth;
         }
         .message { display: flex; margin-bottom: 12px; max-width: 90%; position: relative; }
         .message .content { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.5; }
@@ -62,7 +63,7 @@
         .message .content p:last-child { margin-bottom: 0; }
         .message .content ul, .message .content ol { padding-left: 20px; }
         .message .content pre { background-color: #2d2d2d; color: #e3e3e3; padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; margin: 1em 0; }
-        
+
         .copy-btn {
             position: absolute;
             bottom: 8px;
@@ -95,14 +96,14 @@
         .dot.yellow { background-color: var(--dot-yellow); }
         .dot.blue { background-color: var(--dot-blue); }
         .dot.red { background-color: var(--dot-red); }
-        
+
         #status-bar-right { display: flex; align-items: center; gap: 8px; }
         .scroll-btn, #new-chat-btn, .quick-prompt-btn, .icon-btn, .retry-btn, .refresh-btn, .copy-btn { transition: transform 0.1s, background-color 0.1s; }
-        .scroll-btn:active, #new-chat-btn:active, .quick-prompt-btn:active, .icon-btn:active, .retry-btn:active, .refresh-btn:active, .copy-btn:active { transform: scale(0.95); background-color: var(--bg-color); } 
-        
+        .scroll-btn:active, #new-chat-btn:active, .quick-prompt-btn:active, .icon-btn:active, .retry-btn:active, .refresh-btn:active, .copy-btn:active { transform: scale(0.95); background-color: var(--bg-color); }
+
         .scroll-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); width: 28px; height: 28px; border-radius: 50%; font-size: 1.1rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         #new-chat-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; cursor: pointer; }
-        
+
         .error-container { text-align: center; }
         .error-container p { color: var(--dot-red); font-size: 0.9rem; margin-bottom: 8px; }
         .retry-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
@@ -113,15 +114,38 @@
 
         #main-model-select { margin-left: auto; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 16px; font-size: 0.85rem; background-color: var(--bg-color); max-width: 120px; flex-shrink: 0; height: 32px; }
         .icon-btn { background: none; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary-color); flex-shrink: 0; padding: 0; }
-        
+
         .input-row { display: flex; align-items: flex-end; width: 100%; gap: 8px; }
-        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 16px; font-size: 1rem; resize: none; max-height: 150px; overflow-y: auto; } 
+        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 16px; font-size: 1rem; resize: none; max-height: 150px; overflow-y: auto; }
         #message-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 20%, transparent); }
-        
+
         #send-button { background-color: var(--primary-color); color: var(--on-primary-color); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: transform 0.1s, background-color 0.2s; }
-        #send-button:active { transform: scale(0.92); } 
+        #send-button:active { transform: scale(0.92); }
         #send-button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
         #send-button.stop-generating { background-color: var(--dot-red); }
+        
+        #show-bars-btn {
+            display: none; /* Hidden by default */
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            z-index: 101; 
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary-color);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        #show-bars-btn:active { transform: scale(0.92); }
+        #show-bars-btn { display: none; } /* JS will toggle this */
+
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
         .modal-content { background-color: var(--bg-color); position: absolute; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%; box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; animation: slideIn 0.3s forwards; }
@@ -140,6 +164,7 @@
         .setting-item label { font-size: 1rem; flex-shrink: 0; margin-right: 12px; }
         .setting-item small { font-size: 0.8rem; color: var(--text-secondary-color); display: block; margin-top: 4px; }
         .setting-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; margin-top: 8px; }
+        .prompt-inputs-container { display: flex; gap: 8px; width: 100%; }
         .refresh-btn-container { display: flex; justify-content: center; padding-top: 8px; }
         .refresh-btn { padding: 8px 16px; font-size: 0.9rem; border-radius: 20px; border: 1px solid var(--primary-color); background: none; color: var(--primary-color); cursor: pointer; }
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
@@ -157,14 +182,44 @@
     <div class="app-container">
         <main id="chat-view" style="display: flex; flex-direction: column; height: 100%;">
             <div id="chat-window"></div>
-            <div id="status-bar"><div id="connection-status"><span class="dot yellow"></span>Initializing...</div><div id="status-bar-right"><button id="scroll-to-top-btn" class="scroll-btn" title="Scroll to Top">↑</button><button id="scroll-to-bottom-btn" class="scroll-btn" title="Scroll to Bottom">↓</button><button id="new-chat-btn" type="button">New Chat</button></div></div>
-            <form id="chat-form"><div id="top-input-bar"><button type="button" class="quick-prompt-btn">Explain:</button><button type="button" class="quick-prompt-btn">Tell briefly:</button><select id="main-model-select" class="main-model-select" aria-label="Select Model"></select><button id="main-settings-btn" type="button" class="icon-btn" aria-label="Open Settings"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button></div><div class="input-row"><textarea id="message-input" placeholder="Chat with Ai..." rows="1" autofocus></textarea><button id="send-button" type="submit" aria-label="Send Message"></button></div></form>
+            <div id="status-bar">
+                <div id="connection-status"><span class="dot yellow"></span>Initializing...</div>
+                <div id="status-bar-right">
+                    <button id="main-settings-btn" type="button" class="icon-btn" aria-label="Open Settings"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+                    <button id="scroll-to-top-btn" class="scroll-btn" title="Scroll to Top">↑</button>
+                    <button id="scroll-to-bottom-btn" class="scroll-btn" title="Scroll to Bottom">↓</button>
+                    <button id="new-chat-btn" type="button">New Chat</button>
+                    <button id="hide-bars-btn" type="button" class="icon-btn" aria-label="Hide Bars" title="Hide Bars"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+                </div>
+            </div>
+            <form id="chat-form">
+                <div id="top-input-bar">
+                    <button id="quick-prompt-btn-1" type="button" class="quick-prompt-btn">Explain:</button>
+                    <button id="quick-prompt-btn-2" type="button" class="quick-prompt-btn">Tell briefly:</button>
+                    <button type="button" class="quick-prompt-btn">input</button>
+                    <select id="main-model-select" class="main-model-select" aria-label="Select Model"></select>
+                </div>
+                <div class="input-row">
+                    <textarea id="message-input" placeholder="Chat with Ai..." rows="1" autofocus></textarea>
+                    <button id="send-button" type="submit" aria-label="Send Message"></button>
+                </div>
+            </form>
         </main>
+        <button id="show-bars-btn" type="button" aria-label="Show Bars" title="Show Bars"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
     </div>
-    <div id="settings-modal" class="modal"><div class="modal-content"><header class="modal-header"><h2>Settings</h2><button id="close-settings-btn" class="close-btn" aria-label="Close Settings">×</button></header><div class="modal-body"><div class="settings-group"><h3>API & Model</h3><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="api-key-input">Gemini API Key</label><small>Overrides the default key. Stored locally.</small><input type="password" id="api-key-input" class="setting-input" placeholder="Enter your key"></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="system-prompt-input">System Prompt</label><small>Defines the AI's default behavior.</small><textarea id="system-prompt-input" class="setting-input" rows="3" placeholder="Leave empty for default behavior..."></textarea></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="temperature-slider">Temperature</label><small>Controls randomness. Lower is more predictable.</small><div class="slider-container"><input type="range" id="temperature-slider" min="0" max="1" step="0.1" class="setting-input" style="margin-top:0;"><span id="temperature-value-display" style="min-width: 2.5em; text-align: right;">1.0</span></div></div><div class="refresh-btn-container"><button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button></div></div><div class="settings-group"><h3>Chat Behavior</h3><div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div></div><div class="settings-group"><h3>Other Settings</h3><div class="setting-item"><label for="send-on-enter-toggle">Send on Enter Key</label><label class="switch"><input type="checkbox" id="send-on-enter-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="save-history-toggle">Save Chat History</label><label class="switch"><input type="checkbox" id="save-history-toggle"><span class="slider"></span></label></div></div></div><footer class="modal-footer"><p>This app is created by Samar Shahbaz MBBS’29.</p></footer></div></div>
-    
+    <div id="settings-modal" class="modal"><div class="modal-content"><header class="modal-header"><h2>Settings</h2><button id="close-settings-btn" class="close-btn" aria-label="Close Settings">×</button></header><div class="modal-body"><div class="settings-group"><h3>API & Model</h3><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="api-key-input">Gemini API Key</label><small>Overrides the default key. Stored locally.</small><input type="password" id="api-key-input" class="setting-input" placeholder="Enter your key"></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="system-prompt-input">System Prompt</label><small>Defines the AI's default behavior.</small><textarea id="system-prompt-input" class="setting-input" rows="3" placeholder="Leave empty for default behavior..."></textarea></div><div class="setting-item" style="flex-direction: column; align-items: flex-start;"><label for="temperature-slider">Temperature</label><small>Controls randomness. Lower is more predictable.</small><div class="slider-container"><input type="range" id="temperature-slider" min="0" max="1" step="0.1" class="setting-input" style="margin-top:0;"><span id="temperature-value-display" style="min-width: 2.5em; text-align: right;">1.0</span></div></div><div class="refresh-btn-container"><button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button></div></div><div class="settings-group"><h3>Chat Behavior</h3><div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="auto-hide-on-send-toggle">Auto-hide on Send</label><label class="switch"><input type="checkbox" id="auto-hide-on-send-toggle"><span class="slider"></span></label></div>
+                    <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                        <label>Quick Prompts</label>
+                        <small>Set the text for the shortcut buttons.</small>
+                        <div class="prompt-inputs-container">
+                            <input type="text" id="quick-prompt-1-input" class="setting-input" placeholder="Prompt 1">
+                            <input type="text" id="quick-prompt-2-input" class="setting-input" placeholder="Prompt 2">
+                        </div>
+                    </div>
+                </div><div class="settings-group"><h3>Other Settings</h3><div class="setting-item"><label for="send-on-enter-toggle">Send on Enter Key</label><label class="switch"><input type="checkbox" id="send-on-enter-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="save-history-toggle">Save Chat History</label><label class="switch"><input type="checkbox" id="save-history-toggle"><span class="slider"></span></label></div></div></div><footer class="modal-footer"><p>This app is created by Samar Shahbaz MBBS’29.</p></footer></div></div>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const chatWindow = document.getElementById('chat-window');
@@ -188,9 +243,14 @@
             const scrollToBottomBtn = document.getElementById('scroll-to-bottom-btn');
             const temperatureSlider = document.getElementById('temperature-slider');
             const temperatureValueDisplay = document.getElementById('temperature-value-display');
-            
-            // ✅ STABLE: Default API key is set.
-            const DEFAULT_API_KEY = "AIzaSyDnKMIXmkQLSteQbFfS6mmsUJACZQm4bJo"; 
+            const hideBarsBtn = document.getElementById('hide-bars-btn');
+            const showBarsBtn = document.getElementById('show-bars-btn');
+            const autoHideOnSendToggle = document.getElementById('auto-hide-on-send-toggle');
+            const statusBar = document.getElementById('status-bar');
+            const quickPrompt1Input = document.getElementById('quick-prompt-1-input');
+            const quickPrompt2Input = document.getElementById('quick-prompt-2-input');
+
+            const DEFAULT_API_KEY = "AIzaSyDnKMIXmkQLSteQbFfS6mmsUJACZQm4bJo";
             let chatHistory = [];
             let currentModelSettings = {};
             let abortController = null;
@@ -198,9 +258,20 @@
             const sendIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
             const stopIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>`;
 
+            // NEW: Debounce utility function
+            function debounce(func, delay) {
+                let timeoutId;
+                return function(...args) {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        func.apply(this, args);
+                    }, delay);
+                };
+            }
+
             function setSendButtonState(state) { if (state === 'stop') { sendButton.innerHTML = stopIconSVG; sendButton.classList.add('stop-generating'); sendButton.setAttribute('aria-label', 'Stop Generating'); sendButton.disabled = false; } else { sendButton.innerHTML = sendIconSVG; sendButton.classList.remove('stop-generating'); sendButton.setAttribute('aria-label', 'Send Message'); } }
-            function updateStatus(state, text = '') { let color = 'yellow'; let message = text; setSendButtonState('send'); sendButton.disabled = false; switch (state) { case 'ready': color = 'green'; message = `Ready (${text})`; break; case 'sending': color = 'yellow'; message = 'Sending...'; sendButton.disabled = true; break; case 'generating': color = 'blue'; message = 'Generating...'; setSendButtonState('stop'); break; case 'error': color = 'red'; message = `Error: ${text}`; break; case 'stopped': color = 'yellow'; message = 'Stopped'; break; default: message = 'Initializing...'; sendButton.disabled = true; } connectionStatus.innerHTML = `<span class="dot ${color}"></span>${message}`; }
-            
+            function updateStatus(state, text = '') { let color = 'yellow'; let message = text; setSendButtonState('send'); sendButton.disabled = false; switch (state) { case 'ready': color = 'green'; message = `Ready`; break; case 'sending': color = 'yellow'; message = 'Sending'; sendButton.disabled = true; break; case 'generating': color = 'blue'; message = 'Generating'; setSendButtonState('stop'); break; case 'error': color = 'red'; message = `Error: ${text}`; break; case 'stopped': color = 'yellow'; message = 'Stopped'; break; default: message = 'Initializing...'; sendButton.disabled = true; } connectionStatus.innerHTML = `<span class="dot ${color}"></span>${message}`; }
+
             const settingsConfig = {
                 'apiKey': { el: apiKeyInput, type: 'value', default: '' },
                 'systemPrompt': { el: systemPromptInput, type: 'value', default: '' },
@@ -209,11 +280,14 @@
                 'isMarkdown': { el: markdownToggle, type: 'checked', default: true },
                 'isSendOnEnter': { el: sendOnEnterToggle, type: 'checked', default: false },
                 'isSaveHistory': { el: saveHistoryToggle, type: 'checked', default: true },
+                'autoHideOnSend': { el: autoHideOnSendToggle, type: 'checked', default: false },
+                'quickPrompt1': { el: quickPrompt1Input, type: 'value', default: 'Explain:' },
+                'quickPrompt2': { el: quickPrompt2Input, type: 'value', default: 'Tell briefly:' },
             };
 
             function getSetting(key) { const storedValue = localStorage.getItem(`settings_global_${key}`); return storedValue !== null ? JSON.parse(storedValue) : settingsConfig[key].default; }
             function saveSetting(key, value) { localStorage.setItem(`settings_global_${key}`, JSON.stringify(value)); }
-            
+
             function loadAllSettings() {
                 for (const key in settingsConfig) {
                     const value = getSetting(key);
@@ -228,35 +302,107 @@
                 }
             }
             function saveAllSettings() { for (const key in settingsConfig) { const config = settingsConfig[key]; if (config.el) { saveSetting(key, config.el[config.type]); currentModelSettings[key] = config.el[config.type]; } } }
-            
+
+            function updateQuickPromptButtons() {
+                document.getElementById('quick-prompt-btn-1').textContent = getSetting('quickPrompt1');
+                document.getElementById('quick-prompt-btn-2').textContent = getSetting('quickPrompt2');
+            }
+
             async function fetchModels(isManualRefresh = false) { refreshModelsBtn.disabled = true; refreshModelsBtn.textContent = 'Refreshing...'; const apiKey = getSetting('apiKey') || DEFAULT_API_KEY; const API_URL = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`; try { const response = await fetch(API_URL); if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); const data = await response.json(); const chatModels = data.models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => ({ id: m.name.split('/')[1], name: m.displayName })); localStorage.setItem('cachedModels', JSON.stringify(chatModels)); populateModelDropdown(chatModels); if (isManualRefresh) alert('Model list updated successfully!'); } catch (error) { console.error("Failed to fetch models:", error); updateStatus('error', 'Model fetch failed'); if (isManualRefresh) alert(`Could not refresh models. Error: ${error.message}`); } finally { refreshModelsBtn.disabled = false; refreshModelsBtn.textContent = 'Refresh Model List'; } }
-            
+
             function populateModelDropdown(models) { const savedModel = localStorage.getItem('selectedModel'); const PREFERRED_DEFAULT_MODEL = 'gemini-2.0-flash'; modelSelect.innerHTML = ''; if (!models || models.length === 0) { modelSelect.innerHTML = '<option>No models found</option>'; updateStatus('error', 'No models found'); return; } models.forEach(model => { const option = document.createElement('option'); option.value = model.id; option.textContent = model.name; modelSelect.appendChild(option); }); if (savedModel && models.some(m => m.id === savedModel)) { modelSelect.value = savedModel; } else if (models.some(m => m.id === PREFERRED_DEFAULT_MODEL)) { modelSelect.value = PREFERRED_DEFAULT_MODEL; } else if (models.length > 0) { modelSelect.value = models[0].id; } localStorage.setItem('selectedModel', modelSelect.value); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); }
             
+            function hideBars() {
+                statusBar.style.display = 'none';
+                chatForm.style.display = 'none';
+                showBarsBtn.style.display = 'flex';
+            }
+
+            function showBars() {
+                statusBar.style.display = 'flex';
+                chatForm.style.display = 'flex';
+                showBarsBtn.style.display = 'none';
+                messageInput.focus();
+            }
+
             newChatBtn.addEventListener('click', startNewConversation);
             mainSettingsBtn.addEventListener('click', () => settingsModal.classList.add('active'));
-            closeSettingsBtn.addEventListener('click', () => { settingsModal.classList.remove('active'); saveAllSettings(); });
+            closeSettingsBtn.addEventListener('click', () => { 
+                settingsModal.classList.remove('active'); 
+                saveAllSettings(); 
+                updateQuickPromptButtons();
+            });
             refreshModelsBtn.addEventListener('click', () => fetchModels(true));
             modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); });
             messageInput.addEventListener('input', () => { messageInput.style.height = 'auto'; messageInput.style.height = (messageInput.scrollHeight) + 'px'; });
             messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && getSetting('isSendOnEnter')) { e.preventDefault(); chatForm.requestSubmit(); } });
-            document.querySelector('#top-input-bar').addEventListener('click', (e) => { if (e.target.classList.contains('quick-prompt-btn')) { const promptText = e.target.textContent; messageInput.value += (messageInput.value.trim() ? ' ' : '') + promptText + ' '; messageInput.focus(); messageInput.dispatchEvent(new Event('input', { bubbles: true })); } });
+            
+            hideBarsBtn.addEventListener('click', hideBars);
+            showBarsBtn.addEventListener('click', showBars);
+
+            document.querySelector('#top-input-bar').addEventListener('click', (e) => {
+                if (e.target.classList.contains('quick-prompt-btn')) {
+                    const buttonText = e.target.textContent;
+                    if (buttonText.toLowerCase() === 'input') {
+                        messageInput.focus();
+                    } else {
+                        messageInput.value += (messageInput.value.trim() ? ' ' : '') + buttonText + ' ';
+                        messageInput.focus();
+                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            });
+            
             scrollToTopBtn.addEventListener('click', () => chatWindow.scrollTo({ top: 0, behavior: 'smooth' }));
             scrollToBottomBtn.addEventListener('click', () => chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' }));
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && settingsModal.classList.contains('active')) { closeSettingsBtn.click(); } });
-            temperatureSlider.addEventListener('input', () => { temperatureValueDisplay.textContent = parseFloat(temperatureSlider.value).toFixed(1); });
+            
+            // MODIFIED: Event listener for the temperature slider to use debounce.
+            const debouncedSaveTemperature = debounce((value) => saveSetting('temperature', value), 400);
 
-            chatForm.addEventListener('submit', async (e) => { e.preventDefault(); if (abortController) { abortController.abort(); return; } const userInput = messageInput.value.trim(); if (!userInput) return; addMessage(userInput, 'user'); if (getSetting('isSaveHistory')) { chatHistory.push({ role: 'user', parts: [{ text: userInput }] }); } messageInput.value = ''; messageInput.dispatchEvent(new Event('input', { bubbles: true })); messageInput.focus(); const aiMessageElement = addMessage('', 'ai'); await handleApiCall(userInput, aiMessageElement); });
+            temperatureSlider.addEventListener('input', () => {
+                // Update the visual display instantly for good user feedback.
+                temperatureValueDisplay.textContent = parseFloat(temperatureSlider.value).toFixed(1);
+                // Call the debounced function to save the setting efficiently.
+                debouncedSaveTemperature(temperatureSlider.value);
+            });
+
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (abortController) {
+                    abortController.abort();
+                    messageInput.focus();
+                    return;
+                }
+                const userInput = messageInput.value.trim();
+                if (!userInput) return;
+                
+                if (getSetting('autoHideOnSend')) {
+                    hideBars();
+                }
+
+                addMessage(userInput, 'user');
+                if (getSetting('isSaveHistory')) {
+                    chatHistory.push({ role: 'user', parts: [{ text: userInput }] });
+                }
+                messageInput.value = '';
+                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                messageInput.focus();
+                const aiMessageElement = addMessage('', 'ai');
+                await handleApiCall(userInput, aiMessageElement);
+            });
+            
             chatWindow.addEventListener('click', async (e) => { const target = e.target.closest('button'); if (!target) return; if (target.classList.contains('copy-btn')) { const contentEl = target.previousElementSibling; if (!contentEl) return; try { await navigator.clipboard.writeText(contentEl.innerText); target.innerHTML = '✓'; target.classList.add('copied'); setTimeout(() => { target.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`; target.classList.remove('copied'); }, 1500); } catch (err) { console.error('Failed to copy text: ', err); } } else if (target.classList.contains('retry-btn')) { const aiMessageElement = target.closest('.message.ai'); const failedPrompt = aiMessageElement.dataset.failedPrompt; if (aiMessageElement && failedPrompt) { aiMessageElement.querySelector('.content').innerHTML = ''; await handleApiCall(failedPrompt, aiMessageElement, false); } } });
-            
+
             async function handleApiCall(prompt, aiMessageElement, addToHistory = true) { const thinkingElement = showTypingIndicator(aiMessageElement); updateStatus('generating'); try { await callGeminiAPI(prompt, aiMessageElement); } catch (error) { if (error.name === 'AbortError') { console.log('API call aborted by user.'); const contentEl = aiMessageElement.querySelector('.content'); if (!contentEl.innerText.trim()) { contentEl.innerHTML = `<p style="color:var(--text-secondary-color);">Generation stopped.</p>`; } updateStatus('stopped'); } else { console.error("API Call Failed:", error); const errorMessage = error.message || "An unknown error occurred."; updateStatus('error', 'Response failed'); aiMessageElement.dataset.failedPrompt = prompt; const contentEl = aiMessageElement.querySelector('.content'); contentEl.innerHTML = `<div class="error-container"><p><strong>Error:</strong> ${errorMessage}</p><button class="retry-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2 11.5A10 10 0 0 1 12 2a10 10 0 0 1 10 10"/><path d="M22 12.5a10 10 0 0 1-10 10 10 10 0 0 1-10-10"/></svg>Retry</button></div>`; } } finally { thinkingElement?.remove(); abortController = null; if (connectionStatus.innerText.includes('Generating')) { updateStatus('ready', modelSelect.options[modelSelect.selectedIndex].text); } } }
-            
+
             async function callGeminiAPI(prompt, aiMessageElement) {
                 abortController = new AbortController();
                 const apiKey = getSetting('apiKey') || DEFAULT_API_KEY;
                 const model = modelSelect.value;
                 if (!model || model === 'No models found') { throw new Error("No model selected."); }
-                
+
                 const historyForApi = chatHistory.slice(0, -1);
                 const requestBody = {
                     contents: [...historyForApi, { role: 'user', parts: [{ text: prompt }] }],
@@ -267,19 +413,19 @@
                 const isStreaming = getSetting('isStreaming');
                 const streamParam = isStreaming ? ':streamGenerateContent?alt=sse' : ':generateContent';
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}${streamParam}&key=${apiKey}`;
-                
+
                 const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal: abortController.signal });
                 if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`); }
-                
+
                 aiMessageElement.querySelector('.typing-indicator')?.remove();
                 const contentEl = aiMessageElement.querySelector('.content');
                 contentEl.innerHTML = '';
-                
+
                 let fullText = '';
                 if (isStreaming) { fullText = await processStream(response, contentEl); } else {
                     const data = await response.json(); fullText = data.candidates[0].content.parts[0].text; renderContent(fullText, contentEl);
                 }
-                
+
                 if (getSetting('isSaveHistory')) { chatHistory.push({ role: 'model', parts: [{ text: fullText }] }); }
                 postProcessContent(contentEl);
             }
@@ -293,7 +439,23 @@
             function loadChatHistory() { if (!getSetting('isSaveHistory')) { localStorage.removeItem('chatHistory'); chatHistory = []; return false; } const savedHistory = localStorage.getItem('chatHistory'); if (savedHistory && JSON.parse(savedHistory).length > 0) { chatHistory = JSON.parse(savedHistory); chatWindow.innerHTML = ''; chatHistory.forEach(msg => { const messageElement = addMessage(msg.parts[0].text, msg.role); if (msg.role === 'ai') { postProcessContent(messageElement.querySelector('.content')); } }); return true; } chatHistory = []; return false; }
             function saveChatHistory() { if (getSetting('isSaveHistory')) { localStorage.setItem('chatHistory', JSON.stringify(chatHistory)); } }
             function startNewConversation() { chatHistory = []; localStorage.removeItem('chatHistory'); chatWindow.innerHTML = ''; const initialPrompt = "hello"; addMessage(initialPrompt, 'user'); if (getSetting('isSaveHistory')) { chatHistory.push({ role: 'user', parts: [{ text: initialPrompt }] }); } const aiMessageElement = addMessage('', 'ai'); handleApiCall(initialPrompt, aiMessageElement); }
-            async function initializeApp() { setSendButtonState('send'); loadAllSettings(); const cachedModels = localStorage.getItem('cachedModels'); if (cachedModels) { populateModelDropdown(JSON.parse(cachedModels)); } else { await fetchModels(); } const historyWasLoaded = loadChatHistory(); if (!historyWasLoaded) { startNewConversation(); } window.addEventListener('beforeunload', saveChatHistory); messageInput.focus(); }
+            async function initializeApp() { 
+                setSendButtonState('send'); 
+                loadAllSettings();
+                updateQuickPromptButtons();
+                const cachedModels = localStorage.getItem('cachedModels'); 
+                if (cachedModels) { 
+                    populateModelDropdown(JSON.parse(cachedModels)); 
+                } else { 
+                    await fetchModels(); 
+                } 
+                const historyWasLoaded = loadChatHistory(); 
+                if (!historyWasLoaded) { 
+                    startNewConversation(); 
+                } 
+                window.addEventListener('beforeunload', saveChatHistory); 
+                messageInput.focus(); 
+            }
             initializeApp();
         });
     </script>
