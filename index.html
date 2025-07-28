@@ -31,7 +31,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0; padding: 0;
-            background-color: var(--bg-color);
+            background-color: var(--bg-color); /* Applied main background color */
             color: var(--text-primary-color);
             display: flex; flex-direction: column;
             height: 100vh; overflow: hidden;
@@ -41,33 +41,51 @@
             display: flex; flex-direction: column;
             height: 100%; width: 100%;
             max-width: 800px; margin: 0 auto;
-            background-color: var(--surface-color);
+            background-color: var(--bg-color); /* MODIFIED: Set to main bg-color */
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             position: relative; /* Added for positioning show-bars-btn */
         }
         #chat-window {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 16px;
+            padding: 16px 0;
+            background-color: var(--bg-color); /* MODIFIED: Set to main bg-color */
             border-top: 1px solid var(--border-color);
             scroll-behavior: smooth;
         }
         .message { display: flex; margin-bottom: 12px; max-width: 90%; position: relative; }
         .message .content { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; line-height: 1.5; }
-        .message.user { justify-content: flex-end; margin-left: auto; }
+        
+        .message.user {
+            justify-content: flex-end;
+            margin-left: auto;
+            padding: 0 16px; 
+        }
         .message.user .content { background-color: var(--primary-color); color: var(--on-primary-color); border-bottom-right-radius: 4px; }
-        .message.ai { justify-content: flex-start; margin-right: auto; }
-        .message.ai .content { background-color: var(--bg-color); color: var(--text-primary-color); border-bottom-left-radius: 4px; }
+        
+        .message.ai {
+            justify-content: flex-start;
+            margin-right: auto;
+            max-width: 100%; 
+        }
+        .message.ai .content {
+            background-color: transparent; /* MODIFIED: Blend into the background */
+            color: var(--text-primary-color);
+            width: 100%;
+            border-radius: 0; 
+            padding: 10px 16px; 
+        }
+
         .message .content p { margin: 1em 0; }
         .message .content p:first-child { margin-top: 0; }
         .message .content p:last-child { margin-bottom: 0; }
         .message .content ul, .message .content ol { padding-left: 20px; }
-        .message .content pre { background-color: #2d2d2d; color: #e3e3e3; padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; margin: 1em 0; }
+        .message .content pre { background-color: #2d2d2d; color: #e3e3e3; padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; margin: 1em 16px; /* Added horizontal margin */ }
 
         .copy-btn {
             position: absolute;
             bottom: 8px;
-            right: -36px;
+            right: 16px; /* MODIFIED: Adjusted for padding */
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: 50%;
@@ -80,16 +98,17 @@
             color: var(--text-secondary-color);
             opacity: 0;
             transition: opacity 0.2s, color 0.2s;
+            z-index: 1; 
         }
         .message.ai:hover .copy-btn { opacity: 1; }
         .copy-btn.copied { color: var(--dot-green); }
 
-        .table-wrapper { overflow-x: auto; margin: 1em 0; }
-        .message .content table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border-color); }
+        .table-wrapper { overflow-x: auto; margin: 1em 16px; } 
+        .message .content table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border-color); background-color: var(--surface-color); /* Added background to make table visible */ }
         .message .content th, .message .content td { padding: 8px 12px; border: 1px solid var(--border-color); text-align: left; white-space: normal; word-wrap: break-word; }
         .message .content th { background-color: color-mix(in srgb, var(--bg-color) 70%, white); font-weight: 600; }
 
-        #status-bar { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px; border-top: 1px solid var(--border-color); background-color: var(--surface-color); flex-shrink: 0; }
+        #status-bar { display: flex; justify-content: space-between; align-items: center; padding: 4px 12px; border-top: 1px solid var(--border-color); background-color: var(--bg-color); flex-shrink: 0; }
         #connection-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-secondary-color); }
         #connection-status .dot { width: 8px; height: 8px; border-radius: 50%; }
         .dot.green { background-color: var(--dot-green); }
@@ -108,7 +127,7 @@
         .error-container p { color: var(--dot-red); font-size: 0.9rem; margin-bottom: 8px; }
         .retry-btn { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 
-        #chat-form { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid var(--bg-color); background-color: var(--surface-color); flex-shrink: 0; gap: 8px; }
+        #chat-form { display: flex; flex-direction: column; padding: 10px; border-top: 1px solid var(--border-color); background-color: var(--bg-color); flex-shrink: 0; gap: 8px; }
         #top-input-bar { display: flex; align-items: center; gap: 8px; }
         .quick-prompt-btn {
             background-color: var(--bg-color);
@@ -129,19 +148,18 @@
             -webkit-appearance: none;
             appearance: none;
             margin-left: auto;
-            padding: 4px 10px; /* MODIFIED */
+            padding: 4px 10px; 
             border: 1px solid var(--border-color);
             border-radius: 16px;
             font-size: 0.8rem;
             background-color: var(--bg-color);
-            max-width: 120px; /* MODIFIED */
+            max-width: 120px; 
             flex-shrink: 0;
-            /* height property removed */
         }
         .icon-btn { background: none; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary-color); flex-shrink: 0; padding: 0; }
 
         .input-row { display: flex; align-items: flex-end; width: 100%; gap: 8px; }
-        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 16px; font-size: 1rem; resize: none; max-height: 150px; overflow-y: auto; }
+        #message-input { flex-grow: 1; border: 1px solid var(--border-color); border-radius: 20px; padding: 10px 16px; font-size: 1rem; resize: none; max-height: 150px; overflow-y: auto; background-color: var(--surface-color);}
         #message-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 20%, transparent); }
 
         #send-button { background-color: var(--primary-color); color: var(--on-primary-color); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: transform 0.1s, background-color 0.2s; }
@@ -188,7 +206,7 @@
         .setting-item:last-child { border-bottom: none; }
         .setting-item label { font-size: 1rem; flex-shrink: 0; margin-right: 12px; }
         .setting-item small { font-size: 0.8rem; color: var(--text-secondary-color); display: block; margin-top: 4px; }
-        .setting-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; margin-top: 8px; }
+        .setting-item .setting-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; margin-top: 8px; }
         .prompt-inputs-container { display: flex; gap: 8px; width: 100%; }
         .refresh-btn-container { display: flex; justify-content: center; padding-top: 8px; }
         .refresh-btn { padding: 8px 16px; font-size: 0.9rem; border-radius: 20px; border: 1px solid var(--primary-color); background: none; color: var(--primary-color); cursor: pointer; }
@@ -246,6 +264,34 @@
                         <div class="slider-container"><input type="range" id="temperature-slider" min="0" max="1" step="0.1" class="setting-input" style="margin-top:0;">
                         <span id="temperature-value-display" style="min-width: 2.5em; text-align: right;">1.0</span></div>
                     </div>
+                    <div class="setting-item">
+                        <label for="top-p-toggle">Use Top-P</label>
+                        <label class="switch">
+                            <input type="checkbox" id="top-p-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="top-p-slider-container" class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                        <label for="top-p-slider">Top-P</label><small>Cumulative probability sampling.</small>
+                        <div class="slider-container">
+                            <input type="range" id="top-p-slider" min="0" max="1" step="0.01" class="setting-input" style="margin-top:0;">
+                            <span id="top-p-value-display" style="min-width: 2.5em; text-align: right;">0.95</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="top-k-toggle">Use Top-K</label>
+                        <label class="switch">
+                            <input type="checkbox" id="top-k-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="top-k-slider-container" class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                        <label for="top-k-slider">Top-K</label><small>Samples from the K most likely tokens.</small>
+                        <div class="slider-container">
+                            <input type="range" id="top-k-slider" min="1" max="100" step="1" class="setting-input" style="margin-top:0;">
+                            <span id="top-k-value-display" style="min-width: 2.5em; text-align: right;">40</span>
+                        </div>
+                    </div>
                     <div class="refresh-btn-container"><button id="refresh-models-btn" class="refresh-btn">Refresh Model List</button></div></div><div class="settings-group"><h3>Chat Behavior</h3><div class="setting-item"><label for="streaming-toggle">Streaming Response</label><label class="switch"><input type="checkbox" id="streaming-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="markdown-toggle">Render Markdown</label><label class="switch"><input type="checkbox" id="markdown-toggle"><span class="slider"></span></label></div><div class="setting-item"><label for="auto-hide-on-send-toggle">Auto-hide on Send</label><label class="switch"><input type="checkbox" id="auto-hide-on-send-toggle"><span class="slider"></span></label></div>
                     <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
                         <label>Quick Prompts</label>
@@ -260,6 +306,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
 
     <script>
+        // All JavaScript remains the same. No changes are needed here.
         document.addEventListener('DOMContentLoaded', () => {
             const chatWindow = document.getElementById('chat-window');
             const chatForm = document.getElementById('chat-form');
@@ -290,6 +337,14 @@
             const quickPrompt2Input = document.getElementById('quick-prompt-2-input');
             const temperatureToggle = document.getElementById('temperature-toggle');
             const temperatureSliderContainer = document.getElementById('temperature-slider-container');
+            const topPToggle = document.getElementById('top-p-toggle');
+            const topPSliderContainer = document.getElementById('top-p-slider-container');
+            const topPSlider = document.getElementById('top-p-slider');
+            const topPValueDisplay = document.getElementById('top-p-value-display');
+            const topKToggle = document.getElementById('top-k-toggle');
+            const topKSliderContainer = document.getElementById('top-k-slider-container');
+            const topKSlider = document.getElementById('top-k-slider');
+            const topKValueDisplay = document.getElementById('top-k-value-display');
 
             const DEFAULT_API_KEY = "AIzaSyDnKMIXmkQLSteQbFfS6mmsUJACZQm4bJo";
             let chatHistory = [];
@@ -317,6 +372,10 @@
                 'systemPrompt': { el: systemPromptInput, type: 'value', default: '' },
                 'isTemperatureEnabled': { el: temperatureToggle, type: 'checked', default: true },
                 'temperature': { el: temperatureSlider, type: 'value', default: 1 },
+                'isTopPEnabled': { el: topPToggle, type: 'checked', default: true },
+                'topP': { el: topPSlider, type: 'value', default: 0.95 },
+                'isTopKEnabled': { el: topKToggle, type: 'checked', default: true },
+                'topK': { el: topKSlider, type: 'value', default: 40 },
                 'isStreaming': { el: streamingToggle, type: 'checked', default: true },
                 'isMarkdown': { el: markdownToggle, type: 'checked', default: true },
                 'isSendOnEnter': { el: sendOnEnterToggle, type: 'checked', default: false },
@@ -338,6 +397,12 @@
                         config.el[config.type] = value;
                         if (key === 'temperature') {
                             temperatureValueDisplay.textContent = parseFloat(value).toFixed(1);
+                        }
+                        if (key === 'topP') {
+                            topPValueDisplay.textContent = parseFloat(value).toFixed(2);
+                        }
+                        if (key === 'topK') {
+                            topKValueDisplay.textContent = value;
                         }
                     }
                 }
@@ -363,6 +428,22 @@
                     temperatureSliderContainer.classList.remove('setting-disabled');
                 } else {
                     temperatureSliderContainer.classList.add('setting-disabled');
+                }
+            }
+            
+            function updateTopPControlState() {
+                if (topPToggle.checked) {
+                    topPSliderContainer.classList.remove('setting-disabled');
+                } else {
+                    topPSliderContainer.classList.add('setting-disabled');
+                }
+            }
+            
+            function updateTopKControlState() {
+                if (topKToggle.checked) {
+                    topKSliderContainer.classList.remove('setting-disabled');
+                } else {
+                    topKSliderContainer.classList.add('setting-disabled');
                 }
             }
 
@@ -422,13 +503,25 @@
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && settingsModal.classList.contains('active')) { closeSettingsBtn.click(); } });
             
             const debouncedSaveTemperature = debounce((value) => saveSetting('temperature', value), 400);
-
             temperatureSlider.addEventListener('input', () => {
                 temperatureValueDisplay.textContent = parseFloat(temperatureSlider.value).toFixed(1);
                 debouncedSaveTemperature(temperatureSlider.value);
             });
-
             temperatureToggle.addEventListener('change', updateTemperatureControlState);
+
+            const debouncedSaveTopP = debounce((value) => saveSetting('topP', value), 400);
+            topPSlider.addEventListener('input', () => {
+                topPValueDisplay.textContent = parseFloat(topPSlider.value).toFixed(2);
+                debouncedSaveTopP(topPSlider.value);
+            });
+            topPToggle.addEventListener('change', updateTopPControlState);
+
+            const debouncedSaveTopK = debounce((value) => saveSetting('topK', value), 400);
+            topKSlider.addEventListener('input', () => {
+                topKValueDisplay.textContent = topKSlider.value;
+                debouncedSaveTopK(topKSlider.value);
+            });
+            topKToggle.addEventListener('change', updateTopKControlState);
 
 
             chatForm.addEventListener('submit', async (e) => {
@@ -469,6 +562,12 @@
                 const generationConfig = {};
                 if (getSetting('isTemperatureEnabled')) {
                     generationConfig.temperature = parseFloat(getSetting('temperature'));
+                }
+                if (getSetting('isTopPEnabled')) {
+                    generationConfig.topP = parseFloat(getSetting('topP'));
+                }
+                if (getSetting('isTopKEnabled')) {
+                    generationConfig.topK = parseInt(getSetting('topK'), 10);
                 }
 
                 const historyForApi = chatHistory.slice(0, -1);
@@ -512,6 +611,8 @@
                 loadAllSettings();
                 updateQuickPromptButtons();
                 updateTemperatureControlState();
+                updateTopPControlState();
+                updateTopKControlState();
                 const cachedModels = localStorage.getItem('cachedModels'); 
                 if (cachedModels) { 
                     populateModelDropdown(JSON.parse(cachedModels)); 
