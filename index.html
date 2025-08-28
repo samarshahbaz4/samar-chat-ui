@@ -633,7 +633,16 @@
         function loadChatHistory() { if (!getSetting('isSaveHistory')) { localStorage.removeItem('chatHistory'); chatHistory = []; return false; } const savedHistory = localStorage.getItem('chatHistory'); if (savedHistory && JSON.parse(savedHistory).length > 0) { chatHistory = JSON.parse(savedHistory); chatWindow.innerHTML = ''; chatHistory.forEach(msg => { const messageElement = addMessage(msg.parts[0].text, msg.role); if (msg.role === 'ai') { messageElement.dataset.rawText = msg.parts[0].text; renderAndProcessContent(msg.parts[0].text, messageElement.querySelector('.content')); } }); return true; } chatHistory = []; return false; }
         function startNewConversation() { chatHistory = []; localStorage.removeItem('chatHistory'); chatWindow.innerHTML = ''; const initialPrompt = "hello"; addMessage(initialPrompt, 'user'); if (getSetting('isSaveHistory')) chatHistory.push({ role: 'user', parts: [{ text: initialPrompt }] }); const aiMessageElement = addMessage('', 'ai'); handleApiCall(initialPrompt, aiMessageElement); }
         
-        // --- New Scrolling Function ---
+        // --- MODIFICATION: New Scrolling Function ---
+        function scrollToLastUserMessage() {
+            const userMessages = chatWindow.querySelectorAll('.message.user');
+            if (userMessages.length > 0) {
+                const lastUserMessage = userMessages[userMessages.length - 1];
+                lastUserMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // --- Original Scrolling Function (Kept for reference or other uses) ---
         function scrollByMessage(direction) {
             const messages = Array.from(chatWindow.querySelectorAll('.message'));
             if (messages.length === 0) return;
@@ -641,23 +650,17 @@
             const viewportTop = chatWindow.scrollTop;
 
             if (direction === 'next') {
-                // Find the first message that starts below the current viewport top
                 const targetMessage = messages.find(msg => msg.offsetTop > viewportTop + 1);
-
                 if (targetMessage) {
                     targetMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
-                    // If no message is below, we are at the end, scroll to the very bottom
                     chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
                 }
             } else if (direction === 'prev') {
-                // Find the last message that starts above the current viewport top
                 const targetMessage = messages.slice().reverse().find(msg => msg.offsetTop < viewportTop - 1);
-
                 if (targetMessage) {
                     targetMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
-                    // If no message is above, scroll to the very top
                     chatWindow.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
@@ -675,12 +678,15 @@
         messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && getSetting('isSendOnEnter')) { e.preventDefault(); chatForm.requestSubmit(); } });
         hideBarsBtn.addEventListener('click', hideBars);
         showBarsBtn.addEventListener('click', showBars);
-        pageDownBtn.addEventListener('click', () => scrollByMessage('next')); // New button listener
+        
+        // MODIFICATION: Changed button listeners to use the new function
+        pageDownBtn.addEventListener('click', scrollToLastUserMessage); 
+        
         document.querySelector('#top-input-bar').addEventListener('click', (e) => { if (e.target.classList.contains('quick-prompt-btn')) { const buttonId = e.target.id; let fullPromptText = ''; if (buttonId === 'quick-prompt-btn-1') fullPromptText = getSetting('quickPrompt1'); else if (buttonId === 'quick-prompt-btn-2') fullPromptText = getSetting('quickPrompt2'); else if (e.target.textContent.toLowerCase() === 'input') { messageInput.focus(); return; } messageInput.value += (messageInput.value.trim() ? ' ' : '') + fullPromptText + ' '; messageInput.focus(); messageInput.dispatchEvent(new Event('input', { bubbles: true })); } });
         
-        // Updated scroll button listeners
-        scrollToTopBtn.addEventListener('click', () => scrollByMessage('prev'));
-        scrollToBottomBtn.addEventListener('click', () => scrollByMessage('next'));
+        // MODIFICATION: Updated scroll button listeners
+        scrollToTopBtn.addEventListener('click', () => scrollByMessage('prev')); // This remains for scrolling up
+        scrollToBottomBtn.addEventListener('click', scrollToLastUserMessage); // This now scrolls to the last user message
         
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && settingsModal.classList.contains('active')) closeSettingsBtn.click(); });
         
